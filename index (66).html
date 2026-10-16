@@ -1,0 +1,1044 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Webinar Peak Finder</title>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='32' fill='%23141a2c'/%3E%3Ccircle cx='32' cy='30' r='21' fill='%23b7322c' opacity='.9'/%3E%3Cpath d='M32 47C21 47 13 38 13 27c0-6 3-11 7-14l12 19 12-19c4 3 7 8 7 14 0 11-8 20-19 20z' fill='%23e3b04b'/%3E%3Cpath d='M32 47v11' stroke='%23e3b04b' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;600&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky1: #f4ecdb; --sky2: #e8d6b2; --sky3: #d9bd8c;
+    --m1: #c9b894; --m2: #a69570; --m3: #7f6f54; --mist: rgba(244,236,219,.75);
+    --sun: #d1503a; --sun-glow: rgba(209,80,58,.28);
+    --grass: #8b7a52; --wisp: rgba(255,255,255,.75);
+    --paper: rgba(253,249,241,.78); --paper-strong: rgba(253,249,241,.94); --paper-border: rgba(43,37,32,.12);
+    --ink: #2b2520; --soft: #6e6356; --faint: #a79b89; --line: rgba(43,37,32,.12);
+    --gold: #b3821f; --gold-soft: rgba(179,130,31,.14);
+    --crimson: #b5302a; --crimson-soft: rgba(181,48,42,.14);
+    --danger: #a8281f;
+    --tip-bg: rgba(43,37,32,.92); --tip-ink: #fbf6ec;
+    --shadow: 0 10px 30px rgba(70,50,20,.12), 0 1px 2px rgba(70,50,20,.08);
+    --shadow-hover: 0 20px 44px rgba(70,50,20,.18), 0 2px 4px rgba(70,50,20,.08);
+    --f1: #b3821f; --f2: #b5302a; --f3: #5f7f3f; --f4: #3b5b8c; --f5: #cf6b2a; --f6: #7f4466;
+    --r: 16px;
+    color-scheme: light;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  :root[data-theme="dark"] {
+    --sky1: #0c1020; --sky2: #141c33; --sky3: #1d2742;
+    --m1: #202a44; --m2: #171f36; --m3: #0e1426; --mist: rgba(20,28,51,.7);
+    --sun: #efe6cf; --sun-glow: rgba(239,230,207,.18);
+    --grass: #2a3148; --wisp: rgba(255,255,255,.45);
+    --paper: rgba(20,24,38,.7); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
+    --ink: #efe8d8; --soft: #ada391; --faint: #6f6859; --line: rgba(239,232,216,.12);
+    --gold: #e3b04b; --gold-soft: rgba(227,176,75,.16);
+    --crimson: #e2574b; --crimson-soft: rgba(226,87,75,.18);
+    --danger: #ff8a7a;
+    --tip-bg: rgba(239,232,216,.94); --tip-ink: #141826;
+    --shadow: 0 12px 36px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.35);
+    --shadow-hover: 0 22px 50px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.35);
+    --f1: #e3b04b; --f2: #e2574b; --f3: #8fb963; --f4: #6f93d6; --f5: #f0924a; --f6: #c47ba6;
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --sky1: #0c1020; --sky2: #141c33; --sky3: #1d2742;
+      --m1: #202a44; --m2: #171f36; --m3: #0e1426; --mist: rgba(20,28,51,.7);
+      --sun: #efe6cf; --sun-glow: rgba(239,230,207,.18);
+      --grass: #2a3148; --wisp: rgba(255,255,255,.45);
+      --paper: rgba(20,24,38,.7); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
+      --ink: #efe8d8; --soft: #ada391; --faint: #6f6859; --line: rgba(239,232,216,.12);
+      --gold: #e3b04b; --gold-soft: rgba(227,176,75,.16);
+      --crimson: #e2574b; --crimson-soft: rgba(226,87,75,.18);
+      --danger: #ff8a7a;
+      --tip-bg: rgba(239,232,216,.94); --tip-ink: #141826;
+      --shadow: 0 12px 36px rgba(0,0,0,.45), 0 1px 2px rgba(0,0,0,.35);
+      --shadow-hover: 0 22px 50px rgba(0,0,0,.55), 0 2px 4px rgba(0,0,0,.35);
+      --f1: #e3b04b; --f2: #e2574b; --f3: #8fb963; --f4: #6f93d6; --f5: #f0924a; --f6: #c47ba6;
+      color-scheme: dark;
+    }
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0; min-height: 100%;
+    background: linear-gradient(180deg, var(--sky1) 0%, var(--sky2) 55%, var(--sky3) 100%);
+    color: var(--ink);
+    font-family: "Zen Kaku Gothic New", "Segoe UI", Helvetica, Arial, sans-serif;
+    font-size: 15px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  .display { font-family: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif; }
+
+  /* ---------- landscape ---------- */
+  .scene { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+  .scene > * { position: absolute; }
+  .sun {
+    top: 9vh; right: 4vw; width: 20vmin; height: 20vmin; border-radius: 50%;
+    background: radial-gradient(circle at 45% 40%, var(--sun) 0%, var(--sun) 62%, transparent 63%);
+    box-shadow: 0 0 80px 30px var(--sun-glow), 0 0 200px 90px var(--sun-glow);
+    opacity: .92; will-change: transform; transition: background .6s, box-shadow .6s;
+  }
+  .mountains { left: 0; right: 0; bottom: 0; height: 58vh; width: 100%; will-change: transform; }
+  .mountains svg { position: absolute; left: -5%; width: 110%; height: 100%; bottom: 0; }
+  .mist { left: 0; right: 0; bottom: 0; height: 46vh; background: linear-gradient(180deg, transparent 0%, var(--mist) 60%, var(--mist) 100%); }
+  .wisps { inset: 0; width: 100%; height: 100%; }
+  .wisps path { fill: none; stroke: var(--wisp); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 160 1400; stroke-dashoffset: 1560; opacity: 0; animation: wisp 9s ease-in-out infinite; }
+  .wisps path:nth-child(2) { animation-delay: 3s; stroke-width: 1; }
+  .wisps path:nth-child(3) { animation-delay: 6s; stroke-width: 1.2; }
+  @keyframes wisp { 0% { stroke-dashoffset: 1560; opacity: 0; } 8% { opacity: .9; } 55% { opacity: .5; } 70%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+  .grass { left: 0; right: 0; bottom: 0; width: 100%; height: 22vh; min-height: 120px; will-change: transform; }
+  .grass svg { width: 100%; height: 100%; display: block; }
+  .grass path { fill: var(--grass); transform-box: fill-box; transform-origin: 50% 100%; animation: sway 4.2s ease-in-out infinite; opacity: .85; }
+  .grass .s2 path { animation-duration: 5.1s; animation-delay: -1.6s; opacity: .6; }
+  .grass .s3 path { animation-duration: 3.6s; animation-delay: -2.7s; opacity: .95; }
+  @keyframes sway { 0%, 100% { transform: skewX(-3deg) rotate(-1.5deg); } 50% { transform: skewX(5deg) rotate(3deg); } }
+  #leaves { inset: 0; width: 100%; height: 100%; }
+
+  main { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 48px 20px 110px; perspective: 1400px; text-align: center; }
+
+  header { position: relative; margin-bottom: 30px; padding: 0 48px; }
+  h1 { font-size: 40px; font-weight: 500; letter-spacing: .01em; margin: 0 0 8px; line-height: 1.15; }
+  .lede { color: var(--soft); margin: 0 auto; max-width: 46ch; font-size: 16px; }
+  .theme-btn {
+    position: absolute; right: 0; top: 4px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; padding: 0;
+    background: var(--paper); border: 1px solid var(--paper-border); color: var(--soft); cursor: pointer;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .3s cubic-bezier(.2,.8,.2,1), color .2s;
+  }
+  .theme-btn:hover { transform: rotate(20deg) scale(1.06); color: var(--ink); }
+  .theme-btn svg { width: 18px; height: 18px; }
+  .theme-btn .moon { display: none; }
+  :root.is-dark .theme-btn .sun { display: none; }
+  :root.is-dark .theme-btn .moon { display: block; }
+
+  /* washi paper surfaces */
+  .paper {
+    position: relative;
+    background: var(--paper);
+    border: 1px solid var(--paper-border);
+    border-radius: var(--r);
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+  }
+  .paper::after {
+    content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.35 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  :root.is-dark .paper::after { mix-blend-mode: screen; opacity: .25; }
+  .paper > * { position: relative; z-index: 1; }
+
+  /* inputs */
+  .controls { display: grid; grid-template-columns: 1fr; gap: 16px; margin-bottom: 28px; }
+  @media (min-width: 700px) { .controls { grid-template-columns: 1.5fr 1fr; align-items: stretch; } }
+  .drop {
+    padding: 30px 22px; cursor: pointer; outline: none; overflow: hidden;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1), box-shadow .35s;
+  }
+  .drop::before { content: ""; position: absolute; inset: 8px; border-radius: calc(var(--r) - 7px); border: 1.5px dashed var(--line); transition: border-color .3s, inset .3s; z-index: 1; }
+  .drop:hover, .drop:focus-visible { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .drop:hover::before, .drop:focus-visible::before { border-color: var(--gold); }
+  .drop:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .drop.over { transform: scale(1.015); box-shadow: var(--shadow-hover), 0 0 0 6px var(--gold-soft); }
+  .drop.over::before { border-color: var(--gold); inset: 5px; }
+  .drop strong { display: block; font-weight: 700; margin-bottom: 2px; }
+  .drop span { color: var(--soft); font-size: 14px; }
+  .drop input { display: none; }
+  .drop .leaf { display: grid; place-items: center; width: 46px; height: 46px; margin: 0 auto 10px; border-radius: 50%; background: var(--gold-soft); color: var(--gold); animation: bob 3.4s ease-in-out infinite; }
+  .drop .leaf svg { width: 24px; height: 24px; }
+  .drop.over .leaf { animation: bob .9s ease-in-out infinite; }
+  @keyframes bob { 0%,100% { transform: translateY(0) rotate(-6deg); } 50% { transform: translateY(-6px) rotate(6deg); } }
+  .drop .ripple { position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: var(--gold); opacity: 0; pointer-events: none; }
+  .drop.dropped .ripple { animation: ripple .8s cubic-bezier(.2,.7,.3,1); }
+  @keyframes ripple { 0% { opacity: .3; transform: scale(1); } 100% { opacity: 0; transform: scale(110); } }
+
+  .reveal { padding: 20px 22px; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 8px; }
+  .reveal label { font-weight: 700; }
+  .reveal .hint { color: var(--soft); font-size: 13px; margin: 0; }
+  .time-row { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  input[type="time"] {
+    font: inherit; font-weight: 700; font-variant-numeric: tabular-nums; color: var(--ink); text-align: center;
+    background: var(--paper-strong); border: 1px solid var(--line); border-radius: 10px; padding: 9px 12px; min-width: 128px;
+    transition: box-shadow .25s, border-color .25s;
+  }
+  input[type="time"]:focus-visible { outline: none; border-color: var(--crimson); box-shadow: 0 0 0 4px var(--crimson-soft); }
+  button {
+    font: inherit; font-weight: 700; color: var(--ink); background: var(--paper-strong);
+    border: 1px solid var(--line); border-radius: 10px; padding: 9px 14px; cursor: pointer;
+    transition: transform .25s cubic-bezier(.2,.8,.2,1), box-shadow .25s, background-color .2s;
+  }
+  button:hover { transform: translateY(-1px); box-shadow: var(--shadow); }
+  button:active { transform: translateY(0) scale(.97); }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  button.quiet { border-color: transparent; background: transparent; color: var(--soft); box-shadow: none; }
+  button.quiet:hover { color: var(--ink); background: var(--gold-soft); box-shadow: none; }
+
+  /* results */
+  .toolbar { display: flex; flex-direction: column; align-items: center; gap: 8px; margin: 0 0 16px; }
+  .toolbar h2 { font-size: 26px; font-weight: 500; margin: 0; }
+  .toolbar h2::after { content: ""; display: block; width: 44px; height: 2px; margin: 8px auto 0; background: var(--gold); border-radius: 2px; }
+  .toolbar .actions { display: flex; gap: 6px; }
+  .empty { color: var(--soft); padding: 30px 22px; }
+  .card { padding: 22px 24px 18px; margin-bottom: 18px; transform-style: preserve-3d; transition: box-shadow .4s; }
+  .card.tilt { will-change: transform; }
+  .card.enter { animation: cardIn .6s cubic-bezier(.2,.8,.2,1) both; }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
+  .card.combined { overflow: hidden; margin-bottom: 30px; }
+  .card.combined::before { content: ""; position: absolute; inset: auto -20% -60% -20%; height: 120%; pointer-events: none; background: radial-gradient(closest-side, var(--gold-soft), transparent 70%); }
+  .card-head { position: relative; margin-bottom: 14px; padding: 0 60px; }
+  .card-head .name { font-weight: 700; word-break: break-word; display: flex; align-items: center; justify-content: center; gap: 8px; flex-wrap: wrap; }
+  .card-head .meta { color: var(--soft); font-size: 13px; margin-top: 2px; }
+  .card.combined .card-head .name { font-size: 22px; font-weight: 500; }
+  .card-head .remove { position: absolute; right: 0; top: -4px; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--hue, var(--gold)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--hue, var(--gold)) 22%, transparent); }
+  .tag { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); }
+  .card.error { border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
+  .card.error .msg { color: var(--danger); font-size: 14px; }
+  @media (max-width: 560px) { .card-head { padding: 0; } .card-head .remove { position: static; margin-top: 4px; } }
+
+  .figures { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (min-width: 560px) { .figures { grid-template-columns: 1fr 1fr; } }
+  .figure { padding: 14px 16px 12px; border-radius: 12px; background: color-mix(in srgb, var(--paper-strong) 55%, transparent); border: 1px solid var(--line); }
+  .figure .label { font-size: 13px; color: var(--soft); font-weight: 700; }
+  .figure .big {
+    font-family: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", Georgia, serif;
+    font-size: 48px; font-weight: 500; line-height: 1.05; letter-spacing: -0.01em; font-variant-numeric: tabular-nums;
+    color: var(--hue, var(--gold)); margin: 4px 0 2px;
+  }
+  .figure.reveal-fig .big { color: var(--crimson); }
+  .figure .big small { font-family: "Zen Kaku Gothic New", sans-serif; font-size: 14px; font-weight: 700; color: var(--soft); margin-left: 8px; letter-spacing: 0; }
+  .figure .when { font-size: 15px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .figure .sub { color: var(--soft); font-size: 13px; }
+  .figure.off .big { color: var(--faint); }
+  .figure .inline-time { display: inline-flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .figure .inline-time input { padding: 5px 9px; min-width: 112px; font-size: 13px; }
+  .figure .inline-time .note { font-size: 12px; color: var(--soft); }
+  .figure .big.bump { animation: bump .45s cubic-bezier(.2,.9,.3,1.4); }
+  @keyframes bump { 0% { transform: scale(1); } 45% { transform: scale(1.07); } 100% { transform: scale(1); } }
+
+  .chart-wrap { position: relative; margin-top: 4px; }
+  svg.chart { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: pan-y; border-radius: 12px; }
+  .legend { display: flex; gap: 14px; justify-content: center; font-size: 12.5px; color: var(--soft); margin-top: 8px; flex-wrap: wrap; align-items: center; }
+  .legend i { display: inline-block; width: 12px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; background: var(--c, var(--gold)); }
+  .legend .tipnote { flex-basis: 100%; color: var(--faint); }
+
+  .foot { color: var(--soft); font-size: 13px; margin: 30px auto 0; max-width: 60ch; }
+
+  @media (max-width: 560px) {
+    h1 { font-size: 31px; }
+    header { padding: 0 36px; }
+    .figure .big { font-size: 40px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; animation: none !important; }
+    .mountains, .grass, .sun { transform: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="scene" aria-hidden="true">
+  <div class="sun" id="sun"></div>
+  <svg class="wisps" viewBox="0 0 1440 900" preserveAspectRatio="none">
+    <path d="M-40 220 C 200 180, 380 300, 620 240 S 1000 140, 1480 260"/>
+    <path d="M-40 420 C 260 360, 520 480, 820 400 S 1200 320, 1480 440"/>
+    <path d="M-40 140 C 300 220, 600 120, 900 190 S 1250 300, 1480 160"/>
+  </svg>
+  <div class="mountains" id="mountains">
+    <svg viewBox="0 0 1440 500" preserveAspectRatio="none">
+      <path fill="var(--m1)" d="M0 330 C27 318 39 293 90 290 C141 287 119 335 170 320 C221 305 206 246 260 240 C314 234 299 297 350 300 C401 303 379 247 430 250 C481 253 469 304 520 310 C571 316 549 264 600 270 C651 276 636 333 690 330 C744 327 726 269 780 260 C834 251 816 312 870 300 C924 288 906 223 960 220 C1014 217 999 281 1050 290 C1101 299 1079 244 1130 250 C1181 256 1166 304 1220 310 C1274 316 1244 267 1310 270 C1376 273 1401 305 1440 320 L1440 500 L0 500 Z"/>
+      <path fill="var(--m2)" d="M0 390 C33 378 44 353 110 350 C176 347 154 389 220 380 C286 371 270 323 330 320 C390 317 357 367 420 370 C483 373 471 324 540 330 C609 336 584 387 650 390 C716 393 691 343 760 340 C829 337 811 383 880 380 C949 377 924 333 990 330 C1056 327 1034 367 1100 370 C1166 373 1144 337 1210 340 C1276 343 1251 377 1320 380 C1389 383 1404 359 1440 350 L1440 500 L0 500 Z"/>
+      <path fill="var(--m3)" d="M0 440 C42 432 62 414 140 415 C218 416 182 446 260 445 C338 444 316 408 400 410 C484 412 456 447 540 450 C624 453 596 418 680 420 C764 422 736 455 820 455 C904 455 876 422 960 420 C1044 418 1016 448 1100 450 C1184 452 1138 426 1240 425 C1342 424 1380 439 1440 445 L1440 500 L0 500 Z"/>
+    </svg>
+  </div>
+  <div class="mist"></div>
+  <canvas id="leaves"></canvas>
+  <div class="grass" id="grass">
+    <svg viewBox="0 0 1440 160" preserveAspectRatio="none">
+      <g class="s1">
+        <path d="M40 160 C 44 110, 56 80, 62 30 C 58 85, 50 115, 50 160 Z"/>
+        <path d="M130 160 C 128 115, 118 85, 112 45 C 122 90, 134 118, 140 160 Z"/>
+        <path d="M250 160 C 256 120, 270 90, 282 40 C 274 95, 262 125, 260 160 Z"/>
+        <path d="M400 160 C 396 118, 386 86, 374 36 C 388 92, 398 122, 408 160 Z"/>
+        <path d="M560 160 C 566 112, 580 84, 586 20 C 580 88, 570 120, 570 160 Z"/>
+        <path d="M720 160 C 716 120, 706 92, 696 50 C 708 96, 718 124, 728 160 Z"/>
+        <path d="M880 160 C 886 116, 900 86, 912 34 C 902 92, 890 122, 890 160 Z"/>
+        <path d="M1040 160 C 1036 112, 1026 82, 1014 32 C 1028 90, 1038 120, 1048 160 Z"/>
+        <path d="M1200 160 C 1206 118, 1220 90, 1230 42 C 1222 96, 1210 126, 1210 160 Z"/>
+        <path d="M1360 160 C 1356 116, 1346 86, 1334 38 C 1348 94, 1358 122, 1368 160 Z"/>
+      </g>
+      <g class="s2">
+        <path d="M90 160 C 92 125, 100 100, 108 70 C 102 110, 96 130, 98 160 Z"/>
+        <path d="M200 160 C 196 128, 188 104, 178 72 C 190 112, 198 132, 206 160 Z"/>
+        <path d="M330 160 C 334 124, 342 98, 350 60 C 344 106, 338 130, 340 160 Z"/>
+        <path d="M480 160 C 476 130, 468 106, 458 76 C 470 114, 478 134, 486 160 Z"/>
+        <path d="M640 160 C 644 122, 652 96, 660 58 C 654 104, 648 128, 650 160 Z"/>
+        <path d="M800 160 C 796 126, 788 102, 778 70 C 790 110, 798 130, 806 160 Z"/>
+        <path d="M960 160 C 964 124, 972 100, 980 64 C 974 108, 968 130, 970 160 Z"/>
+        <path d="M1120 160 C 1116 128, 1108 104, 1098 74 C 1110 112, 1118 132, 1126 160 Z"/>
+        <path d="M1280 160 C 1284 122, 1292 96, 1300 56 C 1294 102, 1288 128, 1290 160 Z"/>
+        <path d="M1410 160 C 1406 130, 1398 108, 1390 80 C 1400 116, 1408 134, 1416 160 Z"/>
+      </g>
+      <g class="s3">
+        <path d="M10 160 C 14 130, 22 110, 28 86 C 22 118, 18 136, 18 160 Z"/>
+        <path d="M170 160 C 168 134, 162 114, 154 90 C 164 120, 170 138, 176 160 Z"/>
+        <path d="M300 160 C 304 132, 310 112, 318 88 C 312 120, 308 138, 308 160 Z"/>
+        <path d="M440 160 C 438 136, 432 116, 424 94 C 434 122, 440 140, 446 160 Z"/>
+        <path d="M600 160 C 604 130, 612 108, 620 82 C 614 118, 608 136, 608 160 Z"/>
+        <path d="M760 160 C 758 134, 752 114, 744 90 C 754 120, 760 138, 766 160 Z"/>
+        <path d="M920 160 C 924 132, 930 112, 938 86 C 932 120, 928 138, 928 160 Z"/>
+        <path d="M1080 160 C 1078 136, 1072 116, 1064 92 C 1074 122, 1080 140, 1086 160 Z"/>
+        <path d="M1240 160 C 1244 130, 1252 108, 1260 84 C 1254 118, 1248 136, 1248 160 Z"/>
+        <path d="M1400 160 C 1398 134, 1392 114, 1384 90 C 1394 120, 1400 138, 1406 160 Z"/>
+      </g>
+    </svg>
+  </div>
+</div>
+
+<main>
+  <header>
+    <h1 class="display">Webinar Peak Finder</h1>
+    <p class="lede">Drop Zoom attendee reports. Get the peak, and the count at price reveal.</p>
+    <button type="button" class="theme-btn" id="themeBtn" aria-label="Switch day or night">
+      <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a7 7 0 1 0 10.5 10.5z"/></svg>
+    </button>
+  </header>
+
+  <section class="controls" aria-label="Inputs">
+    <div class="drop paper" id="drop" tabindex="0" role="button" aria-label="Choose or drop CSV files">
+      <span class="ripple"></span>
+      <span class="leaf"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 18.5c-4.2 0-7.3-3.4-7.3-7.6 0-2.3 1.1-4.3 2.7-5.4L12 12.8l4.6-7.3c1.6 1.1 2.7 3.1 2.7 5.4 0 4.2-3.1 7.6-7.3 7.6z"/><path d="M12 18.5V23" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <strong>Drop CSV reports here</strong>
+      <span>or click to choose</span>
+      <input type="file" id="fileInput" accept=".csv,text/csv" multiple>
+    </div>
+    <div class="reveal paper">
+      <label for="revealTime">Price reveal time</label>
+      <div class="time-row">
+        <input type="time" id="revealTime">
+        <button type="button" class="quiet" id="clearReveal">Clear</button>
+      </div>
+      <p class="hint">Optional. Or click a point on any chart.</p>
+    </div>
+  </section>
+
+  <section id="combined" aria-label="All reports together" hidden></section>
+
+  <section aria-label="Results">
+    <div class="toolbar">
+      <h2 class="display" id="resultsTitle">Results</h2>
+      <div class="actions">
+        <button type="button" id="copyBtn" hidden>Copy summary</button>
+        <button type="button" class="quiet" id="clearAll" hidden>Remove all</button>
+      </div>
+    </div>
+    <div id="results">
+      <div class="empty paper">No reports yet.</div>
+    </div>
+  </section>
+
+  <p class="foot">Raw exports give exact counts. Cleaned exports count rejoiners as present throughout, so peaks can read slightly high.</p>
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const hoverable = window.matchMedia && window.matchMedia('(hover: hover)').matches;
+  const files = [];
+  let nextId = 1;
+  const combinedState = { animated: false, lastRevealX: null, key: '' };
+  const HUES = ['var(--f1)', 'var(--f2)', 'var(--f3)', 'var(--f4)', 'var(--f5)', 'var(--f6)'];
+
+  const $ = (s) => document.querySelector(s);
+  const drop = $('#drop');
+  const fileInput = $('#fileInput');
+  const revealInput = $('#revealTime');
+  const results = $('#results');
+  const combinedEl = $('#combined');
+  const copyBtn = $('#copyBtn');
+  const clearAllBtn = $('#clearAll');
+
+  // ---------- theme ----------
+  const root = document.documentElement;
+  const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => { const t = root.getAttribute('data-theme'); return t === 'dark' || (!t && sysDark.matches); };
+  function syncIcon() { root.classList.toggle('is-dark', isDark()); }
+  function applyTheme(t) { if (t) root.setAttribute('data-theme', t); else root.removeAttribute('data-theme'); syncIcon(); }
+  try { applyTheme(localStorage.getItem('wpf-theme') || ''); } catch (e) { syncIcon(); }
+  if (sysDark.addEventListener) sysDark.addEventListener('change', syncIcon);
+  $('#themeBtn').addEventListener('click', () => {
+    const next = isDark() ? 'light' : 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('wpf-theme', next); } catch (e) {}
+  });
+
+  // ---------- wind (shared by leaves, grass, parallax) ----------
+  const wind = { x: 0, y: 0, gust: 0, px: 0, py: 0, lastX: null, lastY: null };
+  window.addEventListener('pointermove', (e) => {
+    if (wind.lastX !== null) { wind.px += (e.clientX - wind.lastX) * .06; wind.py += (e.clientY - wind.lastY) * .06; }
+    wind.lastX = e.clientX; wind.lastY = e.clientY;
+  }, { passive: true });
+
+  // ---------- parallax: sun, mountains, grass drift with the pointer ----------
+  (function () {
+    if (reduced || !hoverable) return;
+    const sun = $('#sun'), mts = $('#mountains'), grass = $('#grass');
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null;
+    const tick = () => {
+      cx += (tx - cx) * .05; cy += (ty - cy) * .05;
+      sun.style.transform = `translate3d(${(cx * -14).toFixed(2)}px, ${(cy * -10).toFixed(2)}px, 0)`;
+      mts.style.transform = `translate3d(${(cx * 18).toFixed(2)}px, ${(cy * 6).toFixed(2)}px, 0)`;
+      grass.style.transform = `translate3d(${(cx * 34).toFixed(2)}px, 0, 0)`;
+      if (Math.abs(tx - cx) > .001 || Math.abs(ty - cy) > .001) raf = requestAnimationFrame(tick); else raf = null;
+    };
+    window.addEventListener('pointermove', (e) => {
+      tx = (e.clientX / window.innerWidth - .5) * 2; ty = (e.clientY / window.innerHeight - .5) * 2;
+      if (!raf) raf = requestAnimationFrame(tick);
+    }, { passive: true });
+  })();
+
+  // ---------- falling leaves ----------
+  (function () {
+    const canvas = $('#leaves');
+    if (reduced) { canvas.remove(); return; }
+    const ctx = canvas.getContext('2d');
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    let W = 0, H = 0, leaves = [], running = true;
+    const paletteLight = ['#d9a441', '#e6b85c', '#c8742f', '#b7322c', '#e08a3c', '#caa24c'];
+    const paletteDark = ['#e3b04b', '#f0c766', '#d98a3a', '#d7483c', '#f29a4a', '#f5d27a'];
+    const resize = () => {
+      W = window.innerWidth; H = window.innerHeight;
+      canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const n = Math.round(Math.min(44, Math.max(16, W / 34)));
+      while (leaves.length < n) leaves.push(makeLeaf(true));
+      leaves.length = n;
+    };
+    const makeLeaf = (anywhere) => ({
+      x: Math.random() * W, y: anywhere ? Math.random() * H : -40 - Math.random() * 120,
+      size: 7 + Math.random() * 9, kind: Math.random() < .55 ? 'ginkgo' : 'maple',
+      ci: Math.floor(Math.random() * 6), rot: Math.random() * Math.PI * 2, spin: (Math.random() - .5) * .04,
+      phase: Math.random() * Math.PI * 2, flutter: .6 + Math.random() * 1.2,
+      vx: 0, vy: .4 + Math.random() * .7, depth: .5 + Math.random() * .8, alpha: .55 + Math.random() * .4
+    });
+    function drawGinkgo(s) {
+      ctx.beginPath();
+      ctx.moveTo(0, s * .9);
+      ctx.bezierCurveTo(-s * 1.3, s * .8, -s * 1.3, -s * .6, -s * .55, -s * .95);
+      ctx.lineTo(0, s * .15);
+      ctx.lineTo(s * .55, -s * .95);
+      ctx.bezierCurveTo(s * 1.3, -s * .6, s * 1.3, s * .8, 0, s * .9);
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, s * .9); ctx.lineTo(0, s * 1.5); ctx.stroke();
+    }
+    function drawMaple(s) {
+      ctx.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5, a2 = a + Math.PI / 5;
+        const tipX = Math.cos(a) * s * 1.1, tipY = Math.sin(a) * s * 1.1;
+        const inX = Math.cos(a2) * s * .4, inY = Math.sin(a2) * s * .4;
+        if (i === 0) ctx.moveTo(tipX, tipY); else ctx.lineTo(tipX, tipY);
+        ctx.lineTo(inX, inY);
+      }
+      ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0, s * .3); ctx.lineTo(0, s * 1.4); ctx.stroke();
+    }
+    let last = performance.now();
+    function frame(now) {
+      if (!running) return;
+      const dt = Math.min(40, now - last) / 16.67; last = now;
+      const t = now;
+      // ambient gusts: layered sines read like real wind, not a metronome
+      const base = .55 + .35 * Math.sin(t / 9000) + .25 * Math.sin(t / 2600) * Math.sin(t / 700 + 1.3) + .15 * Math.sin(t / 430);
+      wind.px *= .93; wind.py *= .93;
+      wind.x = base + wind.px; wind.y = wind.py;
+      wind.gust = base;
+      document.documentElement.style.setProperty('--windx', wind.x.toFixed(3));
+      const pal = isDark() ? paletteDark : paletteLight;
+      ctx.clearRect(0, 0, W, H);
+      for (const l of leaves) {
+        l.phase += .03 * l.flutter * dt;
+        const turb = Math.sin(l.phase * .7 + l.x * .01) * .15;
+        l.vx += ((wind.x * .9 + turb) * l.depth - l.vx) * .03 * dt;
+        const targetVy = (.5 + Math.abs(Math.sin(l.phase)) * .5) * l.depth + wind.y * .4 * l.depth;
+        l.vy += (targetVy - l.vy) * .05 * dt;
+        l.x += l.vx * dt; l.y += l.vy * dt + Math.sin(l.phase) * .35 * dt;
+        l.rot += (l.spin + l.vx * .006) * dt;
+        if (l.y > H + 40 || l.x > W + 60) { Object.assign(l, makeLeaf(false)); l.x = Math.random() * W - 60; }
+        if (l.x < -80) l.x = W + 40;
+        const tumble = Math.cos(l.phase * .9);
+        ctx.save();
+        ctx.translate(l.x, l.y);
+        ctx.rotate(l.rot);
+        ctx.scale(1, .55 + .45 * Math.abs(tumble));
+        ctx.globalAlpha = l.alpha * (.5 + .5 * l.depth);
+        ctx.fillStyle = pal[l.ci]; ctx.strokeStyle = pal[l.ci]; ctx.lineWidth = 1.2;
+        if (l.kind === 'ginkgo') drawGinkgo(l.size); else drawMaple(l.size * .85);
+        ctx.restore();
+      }
+      requestAnimationFrame(frame);
+    }
+    window.addEventListener('resize', resize);
+    document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(frame); } });
+    resize();
+    requestAnimationFrame(frame);
+  })();
+
+  // ---------- card tilt ----------
+  function enableTilt(card) {
+    if (reduced || !hoverable) return;
+    card.classList.add('tilt');
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null, inside = false;
+    const tick = () => {
+      cx += (tx - cx) * .12; cy += (ty - cy) * .12;
+      card.style.transform = `rotateX(${(-cy * 1.4).toFixed(3)}deg) rotateY(${(cx * 1.4).toFixed(3)}deg) translateZ(0)`;
+      if (Math.abs(tx - cx) > .002 || Math.abs(ty - cy) > .002) raf = requestAnimationFrame(tick);
+      else { raf = null; if (!inside) card.style.transform = ''; }
+    };
+    card.addEventListener('pointermove', (e) => {
+      if (e.target.closest('svg.chart, input, button')) { tx = 0; ty = 0; } else {
+        const r = card.getBoundingClientRect();
+        tx = ((e.clientX - r.left) / r.width - .5) * 2; ty = ((e.clientY - r.top) / r.height - .5) * 2;
+      }
+      inside = true;
+      if (!raf) raf = requestAnimationFrame(tick);
+    });
+    card.addEventListener('pointerleave', () => { inside = false; tx = 0; ty = 0; if (!raf) raf = requestAnimationFrame(tick); });
+  }
+
+  // ---------- CSV parsing ----------
+  function parseCSV(text) {
+    const rows = [];
+    let row = [], field = '', inQ = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (inQ) {
+        if (c === '"') { if (text[i + 1] === '"') { field += '"'; i++; } else inQ = false; }
+        else field += c;
+      } else if (c === '"') inQ = true;
+      else if (c === ',') { row.push(field); field = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && text[i + 1] === '\n') i++;
+        row.push(field); field = '';
+        if (row.some(v => v.trim() !== '')) rows.push(row);
+        row = [];
+      } else field += c;
+    }
+    row.push(field);
+    if (row.some(v => v.trim() !== '')) rows.push(row);
+    return rows;
+  }
+
+  function parseStamp(s) {
+    if (!s) return null;
+    s = String(s).trim().replace(/^\uFEFF/, '');
+    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    if (m) {
+      let [, mo, d, y, h, mi, se, ap] = m;
+      h = +h; mi = +mi; se = se ? +se : 0;
+      if (ap) { ap = ap.toUpperCase(); if (ap === 'PM' && h < 12) h += 12; if (ap === 'AM' && h === 12) h = 0; }
+      return new Date(+y, +mo - 1, +d, h, mi, se);
+    }
+    const t = Date.parse(s);
+    return isNaN(t) ? null : new Date(t);
+  }
+
+  const norm = (x) => String(x || '').toLowerCase().replace(/[^a-z]/g, '');
+  function findCol(headers, ...names) {
+    const hs = headers.map(norm);
+    for (const n of names) { const i = hs.indexOf(norm(n)); if (i !== -1) return i; }
+    for (const n of names) { const i = hs.findIndex(h => h.includes(norm(n))); if (i !== -1) return i; }
+    return -1;
+  }
+  const cell = (row, i) => (i === -1 || row[i] === undefined) ? '' : String(row[i]).trim();
+
+  function extract(rows) {
+    if (!rows.length) throw new Error('File is empty.');
+    rows = rows.map(r => r.map(c => String(c).replace(/^\uFEFF/, '')));
+    const secIdx = rows.findIndex(r => norm(r[0]) === 'attendeedetails');
+    if (secIdx !== -1) return extractRaw(rows, secIdx);
+    const headers = rows[0].map(h => h.trim());
+    const ji = findCol(headers, 'First Join Time', 'Join Time');
+    const li = findCol(headers, 'Last Leave Time', 'Leave Time');
+    const ai = findCol(headers, 'Attended');
+    if (ji === -1 || li === -1) throw new Error('Not a Zoom attendee report. Expected an "Attendee Details" section (raw) or "First Join Time" and "Last Leave Time" columns (cleaned).');
+    const intervals = []; let skipped = 0;
+    for (let r = 1; r < rows.length; r++) {
+      const row = rows[r];
+      if (ai !== -1 && cell(row, ai).toLowerCase() === 'no') continue;
+      const a = parseStamp(row[ji]), b = parseStamp(row[li]);
+      if (!a || !b || b < a) { skipped++; continue; }
+      intervals.push([a.getTime(), b.getTime()]);
+    }
+    return { intervals, skipped, people: intervals.length, source: 'cleaned', meta: {} };
+  }
+
+  function extractRaw(rows, secIdx) {
+    const meta = {};
+    const topicIdx = rows.findIndex(r => norm(r[0]) === 'topic');
+    if (topicIdx !== -1 && rows[topicIdx + 1]) {
+      const h = rows[topicIdx], v = rows[topicIdx + 1];
+      meta.topic = cell(v, findCol(h, 'Topic'));
+      const mc = cell(v, findCol(h, 'Max Concurrent Views'));
+      if (mc && !isNaN(+mc)) meta.zoomMax = +mc;
+    }
+    const headers = rows[secIdx + 1];
+    if (!headers) throw new Error('"Attendee Details" section has no header row.');
+    const ai = findCol(headers, 'Attended'), ji = findCol(headers, 'Join Time'), li = findCol(headers, 'Leave Time');
+    const ei = findCol(headers, 'Email'), pi = findCol(headers, 'Phone'), ni = findCol(headers, 'User Name (Original Name)', 'User Name');
+    if (ji === -1 || li === -1) throw new Error('Could not find Join Time / Leave Time in the Attendee Details section.');
+    const byPerson = new Map();
+    let skipped = 0;
+    for (let r = secIdx + 2; r < rows.length; r++) {
+      const row = rows[r];
+      if (row.filter(c => c.trim() !== '').length <= 1 && row.length < headers.length - 2) break;
+      if (ai !== -1 && cell(row, ai).toLowerCase() !== 'yes') continue;
+      const a = parseStamp(row[ji]), b = parseStamp(row[li]);
+      if (!a || !b || b < a) { skipped++; continue; }
+      const email = cell(row, ei).toLowerCase();
+      const phone = cell(row, pi).replace(/\D/g, '');
+      const key = email || (phone ? 'p:' + phone : 'n:' + cell(row, ni).toLowerCase()) || 'row:' + r;
+      if (!byPerson.has(key)) byPerson.set(key, []);
+      byPerson.get(key).push([a.getTime(), b.getTime()]);
+    }
+    const intervals = [];
+    for (const segs of byPerson.values()) {
+      segs.sort((x, y) => x[0] - y[0]);
+      let cur = segs[0].slice();
+      for (let k = 1; k < segs.length; k++) {
+        const [a, b] = segs[k];
+        if (a <= cur[1]) cur[1] = Math.max(cur[1], b); else { intervals.push(cur); cur = [a, b]; }
+      }
+      intervals.push(cur);
+    }
+    return { intervals, skipped, people: byPerson.size, source: 'raw', meta };
+  }
+
+  function sweep(intervals) {
+    const ev = [];
+    for (const [a, b] of intervals) { ev.push([a, 1]); ev.push([b, -1]); }
+    ev.sort((x, y) => x[0] - y[0] || y[1] - x[1]);
+    let count = 0, peak = 0, peakAt = ev[0][0], peakUntil = ev[0][0];
+    const curve = [];
+    let i = 0;
+    while (i < ev.length) {
+      const t = ev[i][0];
+      while (i < ev.length && ev[i][0] === t) { count += ev[i][1]; i++; }
+      curve.push([t, count]);
+      if (count > peak) { peak = count; peakAt = t; }
+    }
+    for (let k = 0; k < curve.length; k++) {
+      if (curve[k][0] >= peakAt) { if (curve[k][1] < peak) { peakUntil = curve[k][0]; break; } peakUntil = curve[k][0]; }
+    }
+    return { curve, peak, peakAt, peakUntil, start: ev[0][0], end: ev[ev.length - 1][0] };
+  }
+
+  function analyze(rows) {
+    const ex = extract(rows);
+    if (!ex.intervals.length) throw new Error('No attendees with readable join and leave times.');
+    const sw = sweep(ex.intervals);
+    const dateCounts = {};
+    for (const [a] of ex.intervals) { const d = new Date(a); const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); dateCounts[key] = (dateCounts[key] || 0) + 1; }
+    const dateKey = Object.keys(dateCounts).sort((x, y) => dateCounts[y] - dateCounts[x])[0];
+    const [dy, dm, dd] = dateKey.split('-').map(Number);
+    return Object.assign({ intervals: ex.intervals, skipped: ex.skipped, people: ex.people, source: ex.source, meta: ex.meta, date: { y: dy, m: dm, d: dd } }, sw);
+  }
+
+  function countAt(intervals, t) { let n = 0; for (const [a, b] of intervals) if (a <= t && t <= b) n++; return n; }
+  function curveAt(curve, t) {
+    let lo = 0, hi = curve.length - 1, ans = 0;
+    while (lo <= hi) { const mid = (lo + hi) >> 1; if (curve[mid][0] <= t) { ans = curve[mid][1]; lo = mid + 1; } else hi = mid - 1; }
+    return ans;
+  }
+
+  // ---------- formatting ----------
+  const p2 = (n) => String(n).padStart(2, '0');
+  function fmtTime(ms, secs) {
+    const d = new Date(ms); let h = d.getHours(); const mi = d.getMinutes(), s = d.getSeconds();
+    const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    return p2(h) + ':' + p2(mi) + (secs ? ':' + p2(s) : '') + ' ' + ap;
+  }
+  function fmtTimeShort(ms) {
+    const d = new Date(ms); let h = d.getHours(); const mi = d.getMinutes();
+    const ap = h >= 12 ? 'PM' : 'AM'; h = h % 12 || 12;
+    return h + ':' + p2(mi) + ' ' + ap;
+  }
+  const fmtDate = (date) => new Date(date.y, date.m, date.d).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+  function fmtDur(ms) {
+    const s = Math.round(ms / 1000);
+    if (s < 60) return s + 's';
+    const m = Math.floor(s / 60), r = s % 60;
+    if (m < 60) return r ? m + 'm ' + r + 's' : m + 'm';
+    const h = Math.floor(m / 60); return h + 'h ' + (m % 60) + 'm';
+  }
+  const toHHMM = (ms) => { const d = new Date(ms); return p2(d.getHours()) + ':' + p2(d.getMinutes()); };
+  function revealMs(date, timeStr) {
+    if (!timeStr) return null;
+    const m = timeStr.match(/^(\d{1,2}):(\d{2})/);
+    return m ? new Date(date.y, date.m, date.d, +m[1], +m[2], 0).getTime() : null;
+  }
+  const effectiveReveal = (f) => f.revealOverride !== null ? f.revealOverride : revealInput.value;
+  const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+  // ---------- animation helpers ----------
+  const easeOut = (k) => 1 - Math.pow(1 - k, 3);
+  function anim(dur, fn, done) {
+    if (reduced || dur <= 0) { fn(1); if (done) done(); return; }
+    const t0 = performance.now();
+    function step(now) {
+      const k = Math.max(0, Math.min(1, (now - t0) / dur));
+      fn(easeOut(k));
+      if (k < 1) requestAnimationFrame(step); else if (done) done();
+    }
+    requestAnimationFrame(step);
+  }
+  const countUp = (el, target, dur, suffixHtml) => anim(dur, (k) => { el.innerHTML = Math.round(target * k) + (suffixHtml || ''); });
+
+  // ---------- chart ----------
+  const CH = { W: 880, H: 240, L: 46, R: 18, T: 26, B: 36 };
+  function geom(spec) {
+    const { W, H, L, R, T, B } = CH;
+    const span = Math.max(spec.end - spec.start, 1);
+    const yMax = Math.max(spec.yMax, 1);
+    return { x: (t) => L + ((t - spec.start) / span) * (W - L - R), y: (n) => T + (1 - n / yMax) * (H - T - B), tOf: (xx) => spec.start + ((xx - L) / (W - L - R)) * span, W, H, L, R, T, B };
+  }
+  function pathFor(curve, g, start, end, close) {
+    let d = 'M' + g.x(start).toFixed(1) + ' ' + g.y(0).toFixed(1);
+    let prev = 0;
+    for (const [t, n] of curve) { d += ' L' + g.x(t).toFixed(1) + ' ' + g.y(prev).toFixed(1) + ' L' + g.x(t).toFixed(1) + ' ' + g.y(n).toFixed(1); prev = n; }
+    d += ' L' + g.x(end).toFixed(1) + ' ' + g.y(0).toFixed(1);
+    return close ? d + ' Z' : d;
+  }
+
+  function chartSVG(spec) {
+    const g = geom(spec);
+    const { W, H, L, R, T } = g;
+    const cid = 'clip-' + spec.id, gid = 'grad-' + spec.id;
+    let ticks = '';
+    const n = 6;
+    for (let k = 0; k <= n; k++) {
+      const t = spec.start + ((spec.end - spec.start) * k) / n;
+      ticks += `<text x="${g.x(t).toFixed(1)}" y="${H - 11}" text-anchor="${k === 0 ? 'start' : k === n ? 'end' : 'middle'}" class="tick">${fmtTimeShort(t)}</text>`;
+    }
+    let grid = '';
+    for (const v of [0, Math.round(spec.yMax / 2), spec.yMax]) {
+      const yy = g.y(v).toFixed(1);
+      grid += `<line x1="${L}" x2="${W - R}" y1="${yy}" y2="${yy}" class="grid"/><text x="${L - 9}" y="${(+yy + 4).toFixed(1)}" text-anchor="end" class="tick">${v}</text>`;
+    }
+    let thin = '';
+    for (const s of spec.thin || []) thin += `<path d="${pathFor(s.curve, g, spec.start, spec.end, false)}" class="thin" style="stroke:${s.color}"/>`;
+    const px = g.x(spec.peak.t).toFixed(1), py = g.y(spec.peak.n).toFixed(1), y0 = g.y(0).toFixed(1);
+    const mc = spec.main.color;
+    const sid = 'c-' + spec.id, S = '#' + sid + ' ';
+    return `<svg id="${sid}" class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Attendance over time. Click to set the price reveal time.">
+      <style>
+        ${S}.grid{stroke:var(--line);stroke-width:1}
+        ${S}.tick{font:500 11.5px "Zen Kaku Gothic New",sans-serif;fill:var(--soft);font-variant-numeric:tabular-nums}
+        ${S}.area{fill:url(#${gid})}
+        ${S}.line{fill:none;stroke:${mc};stroke-width:2.2;stroke-linejoin:round;stroke-linecap:round}
+        ${S}.thin{fill:none;stroke-width:1.1;opacity:.55;stroke-linejoin:round}
+        ${S}.peakline{stroke:${mc};stroke-width:1;stroke-dasharray:3 3;opacity:.8}
+        ${S}.peakdot{fill:${mc};stroke:var(--paper-strong);stroke-width:2.5}
+        ${S}.halo{fill:${mc};opacity:.18;transform-box:fill-box;transform-origin:center;animation:breathe 3.6s ease-in-out infinite}
+        ${S}.peakring{fill:none;stroke:${mc};stroke-width:1.5;opacity:0}
+        ${S}.revline{stroke:var(--crimson);stroke-width:1.6;stroke-dasharray:5 4}
+        ${S}.revdot{fill:var(--crimson);stroke:var(--paper-strong);stroke-width:2.5}
+        ${S}.scrubline{stroke:var(--soft);stroke-width:1;opacity:.6}
+        ${S}.scrubdot{fill:var(--paper-strong);stroke:var(--ink);stroke-width:2}
+        ${S}.tipbg{fill:var(--tip-bg);rx:7}
+        ${S}.tiptext{font:700 12px "Zen Kaku Gothic New",sans-serif;fill:var(--tip-ink);font-variant-numeric:tabular-nums}
+        @keyframes breathe{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.9);opacity:.06}}
+        @media (prefers-reduced-motion: reduce){${S}.halo{animation:none}}
+      </style>
+      <defs>
+        <clipPath id="${cid}"><rect class="cliprect" x="${L}" y="0" width="0" height="${H}"/></clipPath>
+        <linearGradient id="${gid}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${mc}" stop-opacity=".4"/><stop offset="1" stop-color="${mc}" stop-opacity=".03"/></linearGradient>
+      </defs>
+      ${grid}
+      <g clip-path="url(#${cid})">
+        <path d="${pathFor(spec.main.curve, g, spec.start, spec.end, true)}" class="area"/>
+        ${thin}
+        <path d="${pathFor(spec.main.curve, g, spec.start, spec.end, false)}" class="line"/>
+      </g>
+      <g class="peakmark" opacity="0">
+        <line x1="${px}" x2="${px}" y1="${py}" y2="${y0}" class="peakline"/>
+        <circle cx="${px}" cy="${py}" r="9" class="halo"/>
+        <circle cx="${px}" cy="${py}" r="4.5" class="peakdot"/>
+        <circle cx="${px}" cy="${py}" r="4.5" class="peakring"/>
+      </g>
+      <g class="revmark" opacity="0"><line class="revline" y1="${T}" y2="${y0}"/><circle class="revdot" r="4.5"/></g>
+      <g class="scrub" style="display:none" pointer-events="none"><line class="scrubline" y1="${T}" y2="${y0}"/><circle class="scrubdot" r="4"/><rect class="tipbg" height="24"/><text class="tiptext"></text></g>
+      <rect class="hit" x="${L}" y="0" width="${W - L - R}" height="${H}" fill="transparent"/>
+      ${ticks}
+    </svg>`;
+  }
+
+  function placeReveal(svg, g, xx, n) {
+    const rm = svg.querySelector('.revmark');
+    const ln = rm.querySelector('.revline'), dt = rm.querySelector('.revdot');
+    ln.setAttribute('x1', xx); ln.setAttribute('x2', xx); dt.setAttribute('cx', xx); dt.setAttribute('cy', g.y(n));
+  }
+
+  function wireChart(svg, spec, state, reveal, onPick) {
+    const g = geom(spec);
+    const clip = svg.querySelector('.cliprect'), peakmark = svg.querySelector('.peakmark'), ring = svg.querySelector('.peakring'), revmark = svg.querySelector('.revmark');
+    const full = g.W - g.L - g.R;
+    const peakFrac = (g.x(spec.peak.t) - g.L) / full;
+    const showReveal = !!reveal && reveal.t >= spec.start && reveal.t <= spec.end;
+    const revealX = showReveal ? g.x(reveal.t) : null;
+    const finishReveal = () => {
+      if (!showReveal) { state.lastRevealX = null; revmark.setAttribute('opacity', '0'); return; }
+      const from = state.lastRevealX;
+      if (from === null || from === undefined) { placeReveal(svg, g, revealX, reveal.n); anim(400, (k) => revmark.setAttribute('opacity', k)); }
+      else {
+        revmark.setAttribute('opacity', '1');
+        anim(520, (k) => { const xx = from + (revealX - from) * k; placeReveal(svg, g, xx, curveAt(spec.main.curve, g.tOf(xx))); }, () => placeReveal(svg, g, revealX, reveal.n));
+      }
+      state.lastRevealX = revealX;
+    };
+    if (!state.animated) {
+      state.animated = true;
+      let peakShown = false;
+      anim(1400, (k) => {
+        clip.setAttribute('width', full * k);
+        if (!peakShown && k >= peakFrac) {
+          peakShown = true;
+          anim(300, (kk) => peakmark.setAttribute('opacity', kk));
+          anim(1100, (kk) => { ring.setAttribute('r', 4.5 + 22 * kk); ring.setAttribute('opacity', (1 - kk) * .7); });
+        }
+      }, () => { if (!peakShown) peakmark.setAttribute('opacity', '1'); finishReveal(); });
+    } else { clip.setAttribute('width', full); peakmark.setAttribute('opacity', '1'); finishReveal(); }
+
+    const scrub = svg.querySelector('.scrub');
+    const sLine = scrub.querySelector('.scrubline'), sDot = scrub.querySelector('.scrubdot'), sBg = scrub.querySelector('.tipbg'), sText = scrub.querySelector('.tiptext');
+    let lastT = null, sx = null, tx = null, raf = null;
+    const draw = () => {
+      sx = sx === null ? tx : sx + (tx - sx) * .35;
+      const t = g.tOf(sx); lastT = t;
+      const n = curveAt(spec.main.curve, t);
+      sLine.setAttribute('x1', sx); sLine.setAttribute('x2', sx); sDot.setAttribute('cx', sx); sDot.setAttribute('cy', g.y(n));
+      sText.textContent = fmtTime(t, false) + '   ' + n + ' watching';
+      const tw = sText.getComputedTextLength() + 18;
+      const flip = sx + tw + 12 > g.W - g.R;
+      const bx = flip ? sx - tw - 12 : sx + 12;
+      sBg.setAttribute('x', bx); sBg.setAttribute('y', g.T - 6); sBg.setAttribute('width', tw);
+      sText.setAttribute('x', bx + 9); sText.setAttribute('y', g.T + 10);
+      if (Math.abs(tx - sx) > .3) raf = requestAnimationFrame(draw); else raf = null;
+    };
+    const move = (e) => {
+      const r = svg.getBoundingClientRect();
+      tx = Math.max(g.L, Math.min(g.W - g.R, ((e.clientX - r.left) / r.width) * g.W));
+      scrub.style.display = '';
+      if (reduced) sx = tx;
+      if (!raf) raf = requestAnimationFrame(draw);
+    };
+    svg.addEventListener('pointermove', move);
+    svg.addEventListener('pointerdown', move);
+    svg.addEventListener('pointerleave', () => { scrub.style.display = 'none'; lastT = null; sx = null; });
+    svg.addEventListener('click', (e) => {
+      if (lastT === null) { const r = svg.getBoundingClientRect(); lastT = g.tOf(Math.max(g.L, Math.min(g.W - g.R, ((e.clientX - r.left) / r.width) * g.W))); }
+      onPick(toHHMM(lastT));
+    });
+  }
+
+  function revealFor(f) {
+    const p = f.parsed;
+    const t = revealMs(p.date, effectiveReveal(f));
+    if (t === null) return { t: null, n: null, outside: false };
+    const outside = t < p.start || t > p.end;
+    return { t, n: outside ? 0 : countAt(p.intervals, t), outside };
+  }
+
+  // ---------- render ----------
+  function figureHTML(o) {
+    const off = o.value === null;
+    return `<div class="figure ${o.cls || ''} ${off ? 'off' : ''}">
+      <div class="label">${o.label}</div>
+      <div class="big ${o.bigCls || ''}" data-count="${off ? '' : o.value}">${off ? '—' : o.value + '<small>watching</small>'}</div>
+      ${o.when ? `<div class="when">${o.when}</div>` : ''}
+      ${o.sub ? `<div class="sub">${o.sub}</div>` : ''}
+      ${o.extra || ''}
+    </div>`;
+  }
+
+  function renderCombined(ok) {
+    if (ok.length < 2) { combinedEl.hidden = true; combinedEl.innerHTML = ''; combinedState.animated = false; combinedState.lastRevealX = null; combinedState.key = ''; return; }
+    const key = ok.map(f => f.id).join(',');
+    if (key !== combinedState.key) { combinedState.animated = false; combinedState.lastRevealX = null; combinedState.key = key; }
+    const first = !combinedState.animated;
+    const all = []; for (const f of ok) all.push(...f.parsed.intervals);
+    const sw = sweep(all);
+    const sumPeaks = ok.reduce((s, f) => s + f.parsed.peak, 0);
+    const held = sw.peakUntil > sw.peakAt ? `held for ${fmtDur(sw.peakUntil - sw.peakAt)}` : 'momentary';
+    const revs = ok.map(revealFor);
+    const anySet = revs.some(r => r.t !== null);
+    let revValue = null, revWhen = '', revSub = '', revPoint = null;
+    if (anySet) {
+      revValue = revs.reduce((s, r) => s + (r.n || 0), 0);
+      const times = new Set(ok.map(f => effectiveReveal(f)).filter(Boolean));
+      const missing = revs.filter(r => r.t === null).length, outsideN = revs.filter(r => r.outside).length;
+      if (times.size === 1) {
+        revWhen = fmtTime(revealMs(ok[0].parsed.date, [...times][0]), false);
+        const ts = revs.filter(r => r.t !== null).map(r => r.t);
+        if (ts.every(t => t === ts[0])) revPoint = { t: ts[0], n: curveAt(sw.curve, ts[0]) };
+      } else revWhen = 'each file at its own time';
+      const bits = [Math.round((revValue / sw.peak) * 100) + '% of combined peak'];
+      if (missing) bits.push(missing + ' file' + (missing > 1 ? 's' : '') + ' without a time');
+      if (outsideN) bits.push(outsideN + ' file' + (outsideN > 1 ? 's' : '') + ' outside its webinar');
+      revSub = bits.join(' · ');
+    }
+    const spec = { id: 'all', start: sw.start, end: sw.end, yMax: sw.peak, main: { curve: sw.curve, color: 'var(--gold)' }, thin: ok.map(f => ({ curve: f.parsed.curve, color: f.hue })), peak: { t: sw.peakAt, n: sw.peak } };
+    const dates = new Set(ok.map(f => fmtDate(f.parsed.date)));
+    const legendFiles = ok.map(f => `<span style="--c:${f.hue}"><i></i>${esc(f.parsed.meta.topic || f.name)}</span>`).join('');
+    combinedEl.hidden = false;
+    combinedEl.innerHTML = `<article class="card combined paper ${first ? 'enter' : ''}">
+      <div class="card-head">
+        <div class="name display">All ${ok.length} reports together</div>
+        <div class="meta">${[...dates].join(', ')} · ${ok.reduce((s, f) => s + f.parsed.people, 0)} attendees · ${fmtTimeShort(sw.start)} to ${fmtTimeShort(sw.end)}</div>
+      </div>
+      <div class="figures">
+        ${figureHTML({ label: 'Combined peak', value: sw.peak, when: fmtTime(sw.peakAt, true), sub: held + (sumPeaks !== sw.peak ? ' · individual peaks add up to ' + sumPeaks : ''), bigCls: 'peakbig' })}
+        ${figureHTML({ label: 'Combined at price reveal', value: revValue, when: revWhen, sub: revValue === null ? 'Set a time above, or click the chart.' : revSub, cls: 'reveal-fig' })}
+      </div>
+      <div class="chart-wrap">${chartSVG(spec)}</div>
+      <div class="legend"><span><i></i>all rooms</span>${legendFiles}<span class="tipnote">hover to read · click to set price reveal for all</span></div>
+    </article>`;
+    const card = combinedEl.querySelector('.card');
+    enableTilt(card);
+    if (first) countUp(card.querySelector('.peakbig'), sw.peak, 1300, '<small>watching</small>');
+    else { const big = card.querySelector('.reveal-fig .big'); if (big && big.dataset.count !== '') { big.classList.add('bump'); countUp(big, +big.dataset.count, 450, '<small>watching</small>'); } }
+    wireChart(card.querySelector('svg.chart'), spec, combinedState, revPoint, (hhmm) => { revealInput.value = hhmm; for (const f of files) f.revealOverride = null; render(); });
+  }
+
+  function render() {
+    const prevScroll = window.scrollY;
+    results.innerHTML = '';
+    const has = files.length > 0;
+    copyBtn.hidden = !has; clearAllBtn.hidden = !has;
+    const ok = files.filter(f => !f.error && f.parsed);
+    $('#resultsTitle').textContent = has ? (ok.length >= 2 ? 'Each report' : 'Results') : 'Results';
+    renderCombined(ok);
+    if (!has) { results.innerHTML = '<div class="empty paper">No reports yet.</div>'; return; }
+
+    for (const f of files) {
+      const card = document.createElement('article');
+      const first = !f.animated;
+      card.className = 'card paper' + (f.error ? ' error' : '') + (first ? ' enter' : '');
+      card.dataset.id = f.id;
+      card.style.setProperty('--hue', f.hue);
+      if (f.error) {
+        f.animated = true;
+        card.innerHTML = `<div class="card-head"><div class="name">${esc(f.name)}</div><button type="button" class="quiet remove" data-remove="${f.id}" aria-label="Remove ${esc(f.name)}">Remove</button></div><div class="msg">${esc(f.error)}</div>`;
+        results.appendChild(card); continue;
+      }
+      const p = f.parsed, rv = effectiveReveal(f), r = revealFor(f);
+      const held = p.peakUntil > p.peakAt ? `held for ${fmtDur(p.peakUntil - p.peakAt)}` : 'momentary';
+      const metaBits = [fmtDate(p.date), p.people + ' attendees', fmtTimeShort(p.start) + ' to ' + fmtTimeShort(p.end)];
+      if (p.meta.zoomMax) metaBits.push('Zoom max ' + p.meta.zoomMax + ' views');
+      if (p.skipped) metaBits.push(p.skipped + ' row' + (p.skipped > 1 ? 's' : '') + ' skipped');
+      const overrideInput = `<div class="inline-time"><input type="time" data-override="${f.id}" value="${esc(rv || '')}" aria-label="Price reveal time for this file"><span class="note">this file only</span></div>`;
+      let revealFig;
+      if (r.t === null) revealFig = figureHTML({ label: 'At price reveal', value: null, sub: 'Set a time, or click the chart.', cls: 'reveal-fig', extra: overrideInput });
+      else if (r.outside) revealFig = figureHTML({ label: 'At price reveal', value: null, when: fmtTime(r.t, false), sub: 'Outside this webinar (' + fmtTimeShort(p.start) + ' to ' + fmtTimeShort(p.end) + ').', cls: 'reveal-fig', extra: overrideInput });
+      else revealFig = figureHTML({ label: 'At price reveal', value: r.n, when: fmtTime(r.t, false), sub: Math.round((r.n / p.peak) * 100) + '% of peak', cls: 'reveal-fig', extra: overrideInput });
+      const spec = { id: f.id, start: p.start, end: p.end, yMax: p.peak, main: { curve: p.curve, color: f.hue }, thin: [], peak: { t: p.peakAt, n: p.peak } };
+      card.innerHTML = `
+        <div class="card-head">
+          <div class="name"><span class="dot"></span>${esc(p.meta.topic || f.name)}<span class="tag">${p.source === 'raw' ? 'raw' : 'cleaned'}</span></div>
+          <div class="meta">${p.meta.topic ? esc(f.name) + ' · ' : ''}${metaBits.join(' · ')}</div>
+          <button type="button" class="quiet remove" data-remove="${f.id}" aria-label="Remove ${esc(f.name)}">Remove</button>
+        </div>
+        <div class="figures">
+          ${figureHTML({ label: 'Peak live attendance', value: p.peak, when: fmtTime(p.peakAt, true), sub: held, bigCls: 'peakbig' })}
+          ${revealFig}
+        </div>
+        <div class="chart-wrap">${chartSVG(spec)}</div>
+        <div class="legend"><span style="--c:${f.hue}"><i></i>peak</span>${r.t !== null && !r.outside ? '<span style="--c:var(--crimson)"><i></i>price reveal</span>' : ''}<span class="tipnote">hover to read · click to set price reveal</span></div>`;
+      results.appendChild(card);
+      enableTilt(card);
+      if (first) countUp(card.querySelector('.peakbig'), p.peak, 1300, '<small>watching</small>');
+      else { const big = card.querySelector('.reveal-fig .big'); if (big && big.dataset.count !== '') { big.classList.add('bump'); countUp(big, +big.dataset.count, 450, '<small>watching</small>'); } }
+      wireChart(card.querySelector('svg.chart'), spec, f, r.t !== null && !r.outside ? { t: r.t, n: r.n } : null, (hhmm) => { f.revealOverride = hhmm === revealInput.value ? null : hhmm; render(); });
+    }
+    window.scrollTo(0, prevScroll);
+  }
+
+  // ---------- file intake ----------
+  function addFiles(list) {
+    const arr = Array.from(list || []).filter(f => /\.csv$/i.test(f.name) || f.type === 'text/csv' || f.type === 'application/vnd.ms-excel');
+    if (!arr.length) return;
+    drop.classList.remove('dropped'); void drop.offsetWidth; drop.classList.add('dropped');
+    let pending = arr.length;
+    for (const file of arr) {
+      const id = nextId++;
+      const entry = { id, name: file.name, parsed: null, error: null, revealOverride: null, animated: false, lastRevealX: null, hue: HUES[(id - 1) % HUES.length] };
+      files.push(entry);
+      const reader = new FileReader();
+      reader.onload = () => { try { entry.parsed = analyze(parseCSV(reader.result)); } catch (e) { entry.error = e.message || 'Could not read this file.'; } if (--pending === 0) render(); };
+      reader.onerror = () => { entry.error = 'Could not read this file.'; if (--pending === 0) render(); };
+      reader.readAsText(file);
+    }
+  }
+  drop.addEventListener('click', () => fileInput.click());
+  drop.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); } });
+  fileInput.addEventListener('change', () => { addFiles(fileInput.files); fileInput.value = ''; });
+  ['dragenter', 'dragover'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.add('over'); }));
+  ['dragleave', 'drop'].forEach(ev => drop.addEventListener(ev, (e) => { e.preventDefault(); drop.classList.remove('over'); }));
+  drop.addEventListener('drop', (e) => addFiles(e.dataTransfer.files));
+  document.addEventListener('dragover', (e) => e.preventDefault());
+  document.addEventListener('drop', (e) => { if (!drop.contains(e.target)) { e.preventDefault(); addFiles(e.dataTransfer.files); } });
+
+  revealInput.addEventListener('input', () => { for (const f of files) f.revealOverride = null; render(); });
+  $('#clearReveal').addEventListener('click', () => { revealInput.value = ''; for (const f of files) f.revealOverride = null; render(); });
+  results.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-remove]');
+    if (!btn) return;
+    const id = +btn.dataset.remove, card = btn.closest('.card');
+    const finish = () => { const i = files.findIndex(f => f.id === id); if (i !== -1) files.splice(i, 1); render(); };
+    if (reduced) return finish();
+    card.style.transition = 'opacity .3s, transform .3s'; card.style.opacity = '0'; card.style.transform = 'translateY(-10px) scale(.98)';
+    setTimeout(finish, 280);
+  });
+  results.addEventListener('change', (e) => {
+    const inp = e.target.closest('[data-override]');
+    if (!inp) return;
+    const f = files.find(x => x.id === +inp.dataset.override);
+    if (!f) return;
+    f.revealOverride = inp.value === revealInput.value ? null : inp.value;
+    render();
+  });
+  clearAllBtn.addEventListener('click', () => { files.length = 0; render(); });
+
+  copyBtn.addEventListener('click', async () => {
+    const lines = [];
+    const ok = files.filter(f => !f.error && f.parsed);
+    if (ok.length >= 2) {
+      const all = []; for (const f of ok) all.push(...f.parsed.intervals);
+      const sw = sweep(all);
+      let line = `All ${ok.length} reports — combined peak ${sw.peak} at ${fmtTime(sw.peakAt, true)}`;
+      const revs = ok.map(revealFor);
+      if (revs.some(r => r.t !== null)) line += `; combined ${revs.reduce((s, r) => s + (r.n || 0), 0)} at price reveal`;
+      lines.push(line);
+    }
+    for (const f of files) {
+      if (f.error) { lines.push(`${f.name}: ${f.error}`); continue; }
+      const p = f.parsed, r = revealFor(f);
+      let line = `${p.meta.topic || f.name} (${fmtDate(p.date)}) — peak ${p.peak} at ${fmtTime(p.peakAt, true)}`;
+      if (r.t !== null) line += r.outside ? `; price reveal ${fmtTime(r.t, false)} is outside the webinar` : `; ${r.n} at price reveal (${fmtTime(r.t, false)})`;
+      lines.push(line);
+    }
+    const text = lines.join('\n');
+    try { await navigator.clipboard.writeText(text); copyBtn.textContent = 'Copied'; } catch (e) { window.prompt('Copy the summary:', text); }
+    setTimeout(() => { copyBtn.textContent = 'Copy summary'; }, 1500);
+  });
+})();
+</script>
+</body>
+</html>
