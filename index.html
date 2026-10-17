@@ -14,7 +14,7 @@
     --m1: #c9b894; --m2: #a69570; --m3: #7f6f54; --mist: rgba(244,236,219,.75);
     --sun: #d1503a; --sun-glow: rgba(209,80,58,.28);
     --grass: #8b7a52; --wisp: rgba(255,255,255,.75);
-    --paper: rgba(253,249,241,.78); --paper-strong: rgba(253,249,241,.94); --paper-border: rgba(43,37,32,.12);
+    --paper: rgba(253,249,241,.85); --paper-strong: rgba(253,249,241,.94); --paper-border: rgba(43,37,32,.12);
     --ink: #2b2520; --soft: #6e6356; --faint: #a79b89; --line: rgba(43,37,32,.12);
     --gold: #b3821f; --gold-soft: rgba(179,130,31,.14);
     --crimson: #b5302a; --crimson-soft: rgba(181,48,42,.14);
@@ -34,7 +34,7 @@
     --m1: #202a44; --m2: #171f36; --m3: #0e1426; --mist: rgba(20,28,51,.7);
     --sun: #efe6cf; --sun-glow: rgba(239,230,207,.18);
     --grass: #2a3148; --wisp: rgba(255,255,255,.45);
-    --paper: rgba(20,24,38,.7); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
+    --paper: rgba(20,24,38,.78); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
     --ink: #efe8d8; --soft: #ada391; --faint: #6f6859; --line: rgba(239,232,216,.12);
     --gold: #e3b04b; --gold-soft: rgba(227,176,75,.16);
     --crimson: #e2574b; --crimson-soft: rgba(226,87,75,.18);
@@ -51,7 +51,7 @@
       --m1: #202a44; --m2: #171f36; --m3: #0e1426; --mist: rgba(20,28,51,.7);
       --sun: #efe6cf; --sun-glow: rgba(239,230,207,.18);
       --grass: #2a3148; --wisp: rgba(255,255,255,.45);
-      --paper: rgba(20,24,38,.7); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
+      --paper: rgba(20,24,38,.78); --paper-strong: rgba(20,24,38,.92); --paper-border: rgba(227,176,75,.22);
       --ink: #efe8d8; --soft: #ada391; --faint: #6f6859; --line: rgba(239,232,216,.12);
       --gold: #e3b04b; --gold-soft: rgba(227,176,75,.16);
       --crimson: #e2574b; --crimson-soft: rgba(226,87,75,.18);
@@ -87,17 +87,14 @@
   .mountains { left: 0; right: 0; bottom: 0; height: 58vh; width: 100%; will-change: transform; }
   .mountains svg { position: absolute; left: -5%; width: 110%; height: 100%; bottom: 0; }
   .mist { left: 0; right: 0; bottom: 0; height: 46vh; background: linear-gradient(180deg, transparent 0%, var(--mist) 60%, var(--mist) 100%); }
-  .wisps { inset: 0; width: 100%; height: 100%; }
-  .wisps path { fill: none; stroke: var(--wisp); stroke-width: 1.4; stroke-linecap: round; stroke-dasharray: 160 1400; stroke-dashoffset: 1560; opacity: 0; animation: wisp 9s ease-in-out infinite; }
-  .wisps path:nth-child(2) { animation-delay: 3s; stroke-width: 1; }
-  .wisps path:nth-child(3) { animation-delay: 6s; stroke-width: 1.2; }
-  @keyframes wisp { 0% { stroke-dashoffset: 1560; opacity: 0; } 8% { opacity: .9; } 55% { opacity: .5; } 70%, 100% { stroke-dashoffset: 0; opacity: 0; } }
   .grass { left: 0; right: 0; bottom: 0; width: 100%; height: 22vh; min-height: 120px; will-change: transform; }
-  .grass svg { width: 100%; height: 100%; display: block; }
-  .grass path { fill: var(--grass); transform-box: fill-box; transform-origin: 50% 100%; animation: sway 4.2s ease-in-out infinite; opacity: .85; }
-  .grass .s2 path { animation-duration: 5.1s; animation-delay: -1.6s; opacity: .6; }
-  .grass .s3 path { animation-duration: 3.6s; animation-delay: -2.7s; opacity: .95; }
-  @keyframes sway { 0%, 100% { transform: skewX(-3deg) rotate(-1.5deg); } 50% { transform: skewX(5deg) rotate(3deg); } }
+  .grass svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; transform-origin: 50% 100%; will-change: transform; animation: sway 4.2s ease-in-out infinite; }
+  .grass path { fill: var(--grass); opacity: .85; }
+  .grass svg.s2 { animation-duration: 5.1s; animation-delay: -1.6s; }
+  .grass svg.s2 path { opacity: .6; }
+  .grass svg.s3 { animation-duration: 3.6s; animation-delay: -2.7s; }
+  .grass svg.s3 path { opacity: .95; }
+  @keyframes sway { 0%, 100% { transform: skewX(-3.5deg); } 50% { transform: skewX(6deg); } }
   #leaves { inset: 0; width: 100%; height: 100%; }
 
   main { position: relative; z-index: 1; max-width: 960px; margin: 0 auto; padding: 48px 20px 110px; perspective: 1400px; text-align: center; }
@@ -107,8 +104,8 @@
   .lede { color: var(--soft); margin: 0 auto; max-width: 46ch; font-size: 16px; }
   .theme-btn {
     position: absolute; right: 0; top: 4px; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; padding: 0;
-    background: var(--paper); border: 1px solid var(--paper-border); color: var(--soft); cursor: pointer;
-    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform .3s cubic-bezier(.2,.8,.2,1), color .2s;
+    background: var(--paper-strong); border: 1px solid var(--paper-border); color: var(--soft); cursor: pointer;
+    transition: transform .3s cubic-bezier(.2,.8,.2,1), color .2s;
   }
   .theme-btn:hover { transform: rotate(20deg) scale(1.06); color: var(--ink); }
   .theme-btn svg { width: 18px; height: 18px; }
@@ -123,8 +120,7 @@
     border: 1px solid var(--paper-border);
     border-radius: var(--r);
     box-shadow: var(--shadow);
-    backdrop-filter: blur(14px) saturate(1.1);
-    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    isolation: isolate;
   }
   .paper::after {
     content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: .5; mix-blend-mode: multiply;
@@ -221,7 +217,10 @@
   .figure .big.bump { animation: bump .45s cubic-bezier(.2,.9,.3,1.4); }
   @keyframes bump { 0% { transform: scale(1); } 45% { transform: scale(1.07); } 100% { transform: scale(1); } }
 
-  .chart-wrap { position: relative; margin-top: 4px; }
+  .chart-wrap { position: relative; margin-top: 4px; container-type: inline-size; --cw: 100cqw; }
+  .peak-halo-wrap { position: absolute; left: 0; top: 0; width: 0; height: 0; opacity: 0; transition: opacity .3s; pointer-events: none; }
+  .peak-halo { position: absolute; left: 0; top: 0; border-radius: 50%; background: var(--hc, var(--gold)); transform: translate(-50%, -50%); animation: breathe 3.6s ease-in-out infinite; will-change: transform, opacity; }
+  @keyframes breathe { 0%, 100% { transform: translate(-50%, -50%) scale(1); opacity: .18; } 50% { transform: translate(-50%, -50%) scale(1.9); opacity: .06; } }
   svg.chart { display: block; width: 100%; height: auto; cursor: crosshair; touch-action: pan-y; border-radius: 12px; }
   .legend { display: flex; gap: 14px; justify-content: center; font-size: 12.5px; color: var(--soft); margin-top: 8px; flex-wrap: wrap; align-items: center; }
   .legend i { display: inline-block; width: 12px; height: 3px; vertical-align: middle; margin-right: 6px; border-radius: 2px; background: var(--c, var(--gold)); }
@@ -243,11 +242,6 @@
 <body>
 <div class="scene" aria-hidden="true">
   <div class="sun" id="sun"></div>
-  <svg class="wisps" viewBox="0 0 1440 900" preserveAspectRatio="none">
-    <path d="M-40 220 C 200 180, 380 300, 620 240 S 1000 140, 1480 260"/>
-    <path d="M-40 420 C 260 360, 520 480, 820 400 S 1200 320, 1480 440"/>
-    <path d="M-40 140 C 300 220, 600 120, 900 190 S 1250 300, 1480 160"/>
-  </svg>
   <div class="mountains" id="mountains">
     <svg viewBox="0 0 1440 500" preserveAspectRatio="none">
       <path fill="var(--m1)" d="M0 330 C27 318 39 293 90 290 C141 287 119 335 170 320 C221 305 206 246 260 240 C314 234 299 297 350 300 C401 303 379 247 430 250 C481 253 469 304 520 310 C571 316 549 264 600 270 C651 276 636 333 690 330 C744 327 726 269 780 260 C834 251 816 312 870 300 C924 288 906 223 960 220 C1014 217 999 281 1050 290 C1101 299 1079 244 1130 250 C1181 256 1166 304 1220 310 C1274 316 1244 267 1310 270 C1376 273 1401 305 1440 320 L1440 500 L0 500 Z"/>
@@ -258,8 +252,8 @@
   <div class="mist"></div>
   <canvas id="leaves"></canvas>
   <div class="grass" id="grass">
-    <svg viewBox="0 0 1440 160" preserveAspectRatio="none">
-      <g class="s1">
+    <svg class="s1" viewBox="0 0 1440 160" preserveAspectRatio="none">
+      <g>
         <path d="M40 160 C 44 110, 56 80, 62 30 C 58 85, 50 115, 50 160 Z"/>
         <path d="M130 160 C 128 115, 118 85, 112 45 C 122 90, 134 118, 140 160 Z"/>
         <path d="M250 160 C 256 120, 270 90, 282 40 C 274 95, 262 125, 260 160 Z"/>
@@ -271,7 +265,9 @@
         <path d="M1200 160 C 1206 118, 1220 90, 1230 42 C 1222 96, 1210 126, 1210 160 Z"/>
         <path d="M1360 160 C 1356 116, 1346 86, 1334 38 C 1348 94, 1358 122, 1368 160 Z"/>
       </g>
-      <g class="s2">
+    </svg>
+    <svg class="s2" viewBox="0 0 1440 160" preserveAspectRatio="none">
+      <g>
         <path d="M90 160 C 92 125, 100 100, 108 70 C 102 110, 96 130, 98 160 Z"/>
         <path d="M200 160 C 196 128, 188 104, 178 72 C 190 112, 198 132, 206 160 Z"/>
         <path d="M330 160 C 334 124, 342 98, 350 60 C 344 106, 338 130, 340 160 Z"/>
@@ -283,7 +279,9 @@
         <path d="M1280 160 C 1284 122, 1292 96, 1300 56 C 1294 102, 1288 128, 1290 160 Z"/>
         <path d="M1410 160 C 1406 130, 1398 108, 1390 80 C 1400 116, 1408 134, 1416 160 Z"/>
       </g>
-      <g class="s3">
+    </svg>
+    <svg class="s3" viewBox="0 0 1440 160" preserveAspectRatio="none">
+      <g>
         <path d="M10 160 C 14 130, 22 110, 28 86 C 22 118, 18 136, 18 160 Z"/>
         <path d="M170 160 C 168 134, 162 114, 154 90 C 164 120, 170 138, 176 160 Z"/>
         <path d="M300 160 C 304 132, 310 112, 318 88 C 312 120, 308 138, 308 160 Z"/>
@@ -369,7 +367,8 @@
   const root = document.documentElement;
   const sysDark = window.matchMedia('(prefers-color-scheme: dark)');
   const isDark = () => { const t = root.getAttribute('data-theme'); return t === 'dark' || (!t && sysDark.matches); };
-  function syncIcon() { root.classList.toggle('is-dark', isDark()); }
+  const themeHooks = [];
+  function syncIcon() { root.classList.toggle('is-dark', isDark()); for (const h of themeHooks) h(); }
   function applyTheme(t) { if (t) root.setAttribute('data-theme', t); else root.removeAttribute('data-theme'); syncIcon(); }
   try { applyTheme(localStorage.getItem('wpf-theme') || ''); } catch (e) { syncIcon(); }
   if (sysDark.addEventListener) sysDark.addEventListener('change', syncIcon);
@@ -404,19 +403,70 @@
     }, { passive: true });
   })();
 
-  // ---------- falling leaves ----------
+  // ---------- falling leaves and wind wisps (one canvas, sprites, no per-frame path building) ----------
   (function () {
     const canvas = $('#leaves');
     if (reduced) { canvas.remove(); return; }
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { alpha: true });
     const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-    let W = 0, H = 0, leaves = [], running = true;
+    let W = 0, H = 0, leaves = [], running = true, dark = false, wispColor = 'rgba(255,255,255,.7)';
     const paletteLight = ['#d9a441', '#e6b85c', '#c8742f', '#b7322c', '#e08a3c', '#caa24c'];
     const paletteDark = ['#e3b04b', '#f0c766', '#d98a3a', '#d7483c', '#f29a4a', '#f5d27a'];
+    const BASE = 16, PAD = 1.8, SPR = 2;               // sprite drawn at 2x for crispness
+    const sprites = { light: {}, dark: {} };
+    const wispPaths = [
+      new Path2D('M-40 220 C 200 180, 380 300, 620 240 S 1000 140, 1480 260'),
+      new Path2D('M-40 420 C 260 360, 520 480, 820 400 S 1200 320, 1480 440'),
+      new Path2D('M-40 140 C 300 220, 600 120, 900 190 S 1250 300, 1480 160')
+    ];
+    const wispWidth = [1.4, 1, 1.2], wispDelay = [0, 3000, 6000];
+
+    function drawGinkgo(c, s) {
+      c.beginPath();
+      c.moveTo(0, s * .9);
+      c.bezierCurveTo(-s * 1.3, s * .8, -s * 1.3, -s * .6, -s * .55, -s * .95);
+      c.lineTo(0, s * .15);
+      c.lineTo(s * .55, -s * .95);
+      c.bezierCurveTo(s * 1.3, -s * .6, s * 1.3, s * .8, 0, s * .9);
+      c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(0, s * .9); c.lineTo(0, s * 1.5); c.stroke();
+    }
+    function drawMaple(c, s) {
+      c.beginPath();
+      for (let i = 0; i < 5; i++) {
+        const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5, a2 = a + Math.PI / 5;
+        const tipX = Math.cos(a) * s * 1.1, tipY = Math.sin(a) * s * 1.1, inX = Math.cos(a2) * s * .4, inY = Math.sin(a2) * s * .4;
+        if (i === 0) c.moveTo(tipX, tipY); else c.lineTo(tipX, tipY);
+        c.lineTo(inX, inY);
+      }
+      c.closePath(); c.fill();
+      c.beginPath(); c.moveTo(0, s * .3); c.lineTo(0, s * 1.4); c.stroke();
+    }
+    function sprite(kind, ci) {
+      const set = sprites[dark ? 'dark' : 'light'];
+      const key = kind + ci;
+      if (set[key]) return set[key];
+      const size = Math.ceil(BASE * PAD * 2 * SPR);
+      const c = document.createElement('canvas');
+      c.width = size; c.height = size;
+      const g = c.getContext('2d');
+      const col = (dark ? paletteDark : paletteLight)[ci];
+      g.setTransform(SPR, 0, 0, SPR, size / 2, size / 2);
+      g.fillStyle = col; g.strokeStyle = col; g.lineWidth = 1.2;
+      if (kind === 'ginkgo') drawGinkgo(g, BASE); else drawMaple(g, BASE * .85);
+      set[key] = c;
+      return c;
+    }
+    function refreshColors() {
+      dark = isDark();
+      wispColor = getComputedStyle(root).getPropertyValue('--wisp').trim() || wispColor;
+    }
+    themeHooks.push(refreshColors);
+
     const resize = () => {
       W = window.innerWidth; H = window.innerHeight;
-      canvas.width = W * dpr; canvas.height = H * dpr; canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+      canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
       const n = Math.round(Math.min(44, Math.max(16, W / 34)));
       while (leaves.length < n) leaves.push(makeLeaf(true));
       leaves.length = n;
@@ -428,41 +478,36 @@
       phase: Math.random() * Math.PI * 2, flutter: .6 + Math.random() * 1.2,
       vx: 0, vy: .4 + Math.random() * .7, depth: .5 + Math.random() * .8, alpha: .55 + Math.random() * .4
     });
-    function drawGinkgo(s) {
-      ctx.beginPath();
-      ctx.moveTo(0, s * .9);
-      ctx.bezierCurveTo(-s * 1.3, s * .8, -s * 1.3, -s * .6, -s * .55, -s * .95);
-      ctx.lineTo(0, s * .15);
-      ctx.lineTo(s * .55, -s * .95);
-      ctx.bezierCurveTo(s * 1.3, -s * .6, s * 1.3, s * .8, 0, s * .9);
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(0, s * .9); ctx.lineTo(0, s * 1.5); ctx.stroke();
-    }
-    function drawMaple(s) {
-      ctx.beginPath();
-      for (let i = 0; i < 5; i++) {
-        const a = -Math.PI / 2 + (i * 2 * Math.PI) / 5, a2 = a + Math.PI / 5;
-        const tipX = Math.cos(a) * s * 1.1, tipY = Math.sin(a) * s * 1.1;
-        const inX = Math.cos(a2) * s * .4, inY = Math.sin(a2) * s * .4;
-        if (i === 0) ctx.moveTo(tipX, tipY); else ctx.lineTo(tipX, tipY);
-        ctx.lineTo(inX, inY);
+    const eio = (x) => x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    const seg = (u, a, b, va, vb) => va + (vb - va) * eio((u - a) / (b - a));
+    function drawWisps(t) {
+      ctx.setTransform(dpr * W / 1440, 0, 0, dpr * H / 900, 0, 0);
+      ctx.lineCap = 'round'; ctx.strokeStyle = wispColor; ctx.setLineDash([160, 1400]);
+      for (let i = 0; i < 3; i++) {
+        if (t < wispDelay[i]) continue;
+        const u = ((t - wispDelay[i]) % 9000) / 9000;
+        if (u >= .7) continue;
+        let op;
+        if (u < .08) op = seg(u, 0, .08, 0, .9); else if (u < .55) op = seg(u, .08, .55, .9, .5); else op = seg(u, .55, .7, .5, 0);
+        ctx.globalAlpha = op; ctx.lineWidth = wispWidth[i];
+        ctx.lineDashOffset = 1560 * (1 - eio(u / .7));
+        ctx.stroke(wispPaths[i]);
       }
-      ctx.closePath(); ctx.fill();
-      ctx.beginPath(); ctx.moveTo(0, s * .3); ctx.lineTo(0, s * 1.4); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
     }
     let last = performance.now();
+    const t0 = last;
     function frame(now) {
       if (!running) return;
       const dt = Math.min(40, now - last) / 16.67; last = now;
       const t = now;
-      // ambient gusts: layered sines read like real wind, not a metronome
       const base = .55 + .35 * Math.sin(t / 9000) + .25 * Math.sin(t / 2600) * Math.sin(t / 700 + 1.3) + .15 * Math.sin(t / 430);
       wind.px *= .93; wind.py *= .93;
-      wind.x = base + wind.px; wind.y = wind.py;
-      wind.gust = base;
-      document.documentElement.style.setProperty('--windx', wind.x.toFixed(3));
-      const pal = isDark() ? paletteDark : paletteLight;
-      ctx.clearRect(0, 0, W, H);
+      wind.x = base + wind.px; wind.y = wind.py; wind.gust = base;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      drawWisps(now - t0);
+      const half = BASE * PAD * SPR; // sprite half-size in sprite pixels
       for (const l of leaves) {
         l.phase += .03 * l.flutter * dt;
         const turb = Math.sin(l.phase * .7 + l.x * .01) * .15;
@@ -473,20 +518,19 @@
         l.rot += (l.spin + l.vx * .006) * dt;
         if (l.y > H + 40 || l.x > W + 60) { Object.assign(l, makeLeaf(false)); l.x = Math.random() * W - 60; }
         if (l.x < -80) l.x = W + 40;
-        const tumble = Math.cos(l.phase * .9);
-        ctx.save();
-        ctx.translate(l.x, l.y);
-        ctx.rotate(l.rot);
-        ctx.scale(1, .55 + .45 * Math.abs(tumble));
+        const sy = .55 + .45 * Math.abs(Math.cos(l.phase * .9));
+        const k = (l.size / BASE) / SPR, cs = Math.cos(l.rot) * k, sn = Math.sin(l.rot) * k;
+        ctx.setTransform(dpr * cs, dpr * sn, -dpr * sn * sy, dpr * cs * sy, dpr * l.x, dpr * l.y);
         ctx.globalAlpha = l.alpha * (.5 + .5 * l.depth);
-        ctx.fillStyle = pal[l.ci]; ctx.strokeStyle = pal[l.ci]; ctx.lineWidth = 1.2;
-        if (l.kind === 'ginkgo') drawGinkgo(l.size); else drawMaple(l.size * .85);
-        ctx.restore();
+        ctx.drawImage(sprite(l.kind, l.ci), -half, -half);
       }
+      ctx.globalAlpha = 1;
       requestAnimationFrame(frame);
     }
-    window.addEventListener('resize', resize);
+    let resizeTimer = null;
+    window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(resize, 120); });
     document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) { last = performance.now(); requestAnimationFrame(frame); } });
+    refreshColors();
     resize();
     requestAnimationFrame(frame);
   })();
@@ -494,17 +538,17 @@
   // ---------- card tilt ----------
   function enableTilt(card) {
     if (reduced || !hoverable) return;
-    card.classList.add('tilt');
-    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null, inside = false;
+    let tx = 0, ty = 0, cx = 0, cy = 0, raf = null, inside = false, rect = null;
     const tick = () => {
       cx += (tx - cx) * .12; cy += (ty - cy) * .12;
       card.style.transform = `rotateX(${(-cy * 1.4).toFixed(3)}deg) rotateY(${(cx * 1.4).toFixed(3)}deg) translateZ(0)`;
       if (Math.abs(tx - cx) > .002 || Math.abs(ty - cy) > .002) raf = requestAnimationFrame(tick);
-      else { raf = null; if (!inside) card.style.transform = ''; }
+      else { raf = null; if (!inside) { card.style.transform = ''; card.style.willChange = ''; rect = null; } }
     };
+    card.addEventListener('pointerenter', () => { card.style.willChange = 'transform'; rect = card.getBoundingClientRect(); });
     card.addEventListener('pointermove', (e) => {
       if (e.target.closest('svg.chart, input, button')) { tx = 0; ty = 0; } else {
-        const r = card.getBoundingClientRect();
+        const r = rect || (rect = card.getBoundingClientRect());
         tx = ((e.clientX - r.left) / r.width - .5) * 2; ty = ((e.clientY - r.top) / r.height - .5) * 2;
       }
       inside = true;
@@ -746,7 +790,6 @@
         ${S}.thin{fill:none;stroke-width:1.1;opacity:.55;stroke-linejoin:round}
         ${S}.peakline{stroke:${mc};stroke-width:1;stroke-dasharray:3 3;opacity:.8}
         ${S}.peakdot{fill:${mc};stroke:var(--paper-strong);stroke-width:2.5}
-        ${S}.halo{fill:${mc};opacity:.18;transform-box:fill-box;transform-origin:center;animation:breathe 3.6s ease-in-out infinite}
         ${S}.peakring{fill:none;stroke:${mc};stroke-width:1.5;opacity:0}
         ${S}.revline{stroke:var(--crimson);stroke-width:1.6;stroke-dasharray:5 4}
         ${S}.revdot{fill:var(--crimson);stroke:var(--paper-strong);stroke-width:2.5}
@@ -754,8 +797,6 @@
         ${S}.scrubdot{fill:var(--paper-strong);stroke:var(--ink);stroke-width:2}
         ${S}.tipbg{fill:var(--tip-bg);rx:7}
         ${S}.tiptext{font:700 12px "Zen Kaku Gothic New",sans-serif;fill:var(--tip-ink);font-variant-numeric:tabular-nums}
-        @keyframes breathe{0%,100%{transform:scale(1);opacity:.18}50%{transform:scale(1.9);opacity:.06}}
-        @media (prefers-reduced-motion: reduce){${S}.halo{animation:none}}
       </style>
       <defs>
         <clipPath id="${cid}"><rect class="cliprect" x="${L}" y="0" width="0" height="${H}"/></clipPath>
@@ -769,7 +810,6 @@
       </g>
       <g class="peakmark" opacity="0">
         <line x1="${px}" x2="${px}" y1="${py}" y2="${y0}" class="peakline"/>
-        <circle cx="${px}" cy="${py}" r="9" class="halo"/>
         <circle cx="${px}" cy="${py}" r="4.5" class="peakdot"/>
         <circle cx="${px}" cy="${py}" r="4.5" class="peakring"/>
       </g>
@@ -780,6 +820,12 @@
     </svg>`;
   }
 
+  // the breathing halo lives outside the SVG so the chart never repaints for it
+  function haloHTML(spec) {
+    const g = geom(spec);
+    const px = g.x(spec.peak.t) / g.W * 100, py = g.y(spec.peak.n) / g.H * 100;
+    return `<div class="peak-halo-wrap" style="left:${px.toFixed(3)}%;top:${py.toFixed(3)}%"><div class="peak-halo" style="--hc:${spec.main.color};width:calc(var(--cw) * ${(18 / g.W).toFixed(5)});height:calc(var(--cw) * ${(18 / g.W).toFixed(5)})"></div></div>`;
+  }
   function placeReveal(svg, g, xx, n) {
     const rm = svg.querySelector('.revmark');
     const ln = rm.querySelector('.revline'), dt = rm.querySelector('.revdot');
@@ -789,6 +835,8 @@
   function wireChart(svg, spec, state, reveal, onPick) {
     const g = geom(spec);
     const clip = svg.querySelector('.cliprect'), peakmark = svg.querySelector('.peakmark'), ring = svg.querySelector('.peakring'), revmark = svg.querySelector('.revmark');
+    const haloWrap = svg.parentElement.querySelector('.peak-halo-wrap');
+    const showHalo = () => { if (haloWrap) haloWrap.style.opacity = '1'; };
     const full = g.W - g.L - g.R;
     const peakFrac = (g.x(spec.peak.t) - g.L) / full;
     const showReveal = !!reveal && reveal.t >= spec.start && reveal.t <= spec.end;
@@ -810,11 +858,11 @@
         clip.setAttribute('width', full * k);
         if (!peakShown && k >= peakFrac) {
           peakShown = true;
-          anim(300, (kk) => peakmark.setAttribute('opacity', kk));
+          anim(300, (kk) => peakmark.setAttribute('opacity', kk)); showHalo();
           anim(1100, (kk) => { ring.setAttribute('r', 4.5 + 22 * kk); ring.setAttribute('opacity', (1 - kk) * .7); });
         }
-      }, () => { if (!peakShown) peakmark.setAttribute('opacity', '1'); finishReveal(); });
-    } else { clip.setAttribute('width', full); peakmark.setAttribute('opacity', '1'); finishReveal(); }
+      }, () => { if (!peakShown) { peakmark.setAttribute('opacity', '1'); showHalo(); } finishReveal(); });
+    } else { clip.setAttribute('width', full); peakmark.setAttribute('opacity', '1'); showHalo(); finishReveal(); }
 
     const scrub = svg.querySelector('.scrub');
     const sLine = scrub.querySelector('.scrubline'), sDot = scrub.querySelector('.scrubdot'), sBg = scrub.querySelector('.tipbg'), sText = scrub.querySelector('.tiptext');
@@ -907,7 +955,7 @@
         ${figureHTML({ label: 'Combined peak', value: sw.peak, when: fmtTime(sw.peakAt, true), sub: held + (sumPeaks !== sw.peak ? ' · individual peaks add up to ' + sumPeaks : ''), bigCls: 'peakbig' })}
         ${figureHTML({ label: 'Combined at price reveal', value: revValue, when: revWhen, sub: revValue === null ? 'Set a time above, or click the chart.' : revSub, cls: 'reveal-fig' })}
       </div>
-      <div class="chart-wrap">${chartSVG(spec)}</div>
+      <div class="chart-wrap">${chartSVG(spec)}${haloHTML(spec)}</div>
       <div class="legend"><span><i></i>all rooms</span>${legendFiles}<span class="tipnote">hover to read · click to set price reveal for all</span></div>
     </article>`;
     const card = combinedEl.querySelector('.card');
@@ -959,7 +1007,7 @@
           ${figureHTML({ label: 'Peak live attendance', value: p.peak, when: fmtTime(p.peakAt, true), sub: held, bigCls: 'peakbig' })}
           ${revealFig}
         </div>
-        <div class="chart-wrap">${chartSVG(spec)}</div>
+        <div class="chart-wrap">${chartSVG(spec)}${haloHTML(spec)}</div>
         <div class="legend"><span style="--c:${f.hue}"><i></i>peak</span>${r.t !== null && !r.outside ? '<span style="--c:var(--crimson)"><i></i>price reveal</span>' : ''}<span class="tipnote">hover to read · click to set price reveal</span></div>`;
       results.appendChild(card);
       enableTilt(card);
