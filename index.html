@@ -195,6 +195,7 @@
   .tag { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--gold-soft); color: var(--gold); }
   .card.error { border-color: color-mix(in srgb, var(--danger) 40%, transparent); }
   .card.error .msg { color: var(--danger); font-size: 14px; }
+  .warn { font-size: 13.5px; color: var(--ink); background: var(--crimson-soft); border: 1px solid color-mix(in srgb, var(--crimson) 35%, transparent); border-radius: 12px; padding: 10px 14px; margin: 0 0 14px; }
   @media (max-width: 560px) { .card-head { padding: 0; } .card-head .remove { position: static; margin-top: 4px; } }
 
   .figures { display: grid; grid-template-columns: 1fr; gap: 14px; margin-bottom: 14px; }
@@ -580,12 +581,19 @@
     return rows;
   }
 
+  let dayFirst = false; // set per file after scanning its timestamps
+  const STAMP_RE = /^(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i;
+  function detectDateOrder(values) {
+    dayFirst = false;
+    for (const v of values) { const m = String(v || '').trim().match(STAMP_RE); if (m && +m[1] > 12) { dayFirst = true; return; } }
+  }
   function parseStamp(s) {
     if (!s) return null;
     s = String(s).trim().replace(/^\uFEFF/, '');
-    const m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})[ ,T]+(\d{1,2}):(\d{2})(?::(\d{2}))?\s*(AM|PM)?$/i);
+    const m = s.match(STAMP_RE);
     if (m) {
       let [, mo, d, y, h, mi, se, ap] = m;
+      if (dayFirst) { const tmp = mo; mo = d; d = tmp; }
       h = +h; mi = +mi; se = se ? +se : 0;
       if (ap) { ap = ap.toUpperCase(); if (ap === 'PM' && h < 12) h += 12; if (ap === 'AM' && h === 12) h = 0; }
       return new Date(+y, +mo - 1, +d, h, mi, se);
@@ -613,15 +621,19 @@
     const li = findCol(headers, 'Last Leave Time', 'Leave Time');
     const ai = findCol(headers, 'Attended');
     if (ji === -1 || li === -1) throw new Error('Not a Zoom attendee report. Expected an "Attendee Details" section (raw) or "First Join Time" and "Last Leave Time" columns (cleaned).');
-    const intervals = []; let skipped = 0;
+    const ei = findCol(headers, 'Email'), pi = findCol(headers, 'Phone');
+    detectDateOrder(rows.slice(1).map(r => r[ji]));
+    const intervals = [], keys = new Set(); let skipped = 0, noRows = 0;
     for (let r = 1; r < rows.length; r++) {
       const row = rows[r];
-      if (ai !== -1 && cell(row, ai).toLowerCase() === 'no') continue;
+      if (ai !== -1 && cell(row, ai).toLowerCase() !== 'yes') { noRows++; continue; }
       const a = parseStamp(row[ji]), b = parseStamp(row[li]);
       if (!a || !b || b < a) { skipped++; continue; }
       intervals.push([a.getTime(), b.getTime()]);
+      const email = cell(row, ei).toLowerCase(), phone = cell(row, pi).replace(/\D/g, '');
+      keys.add(email || (phone ? 'p:' + phone : 'row:' + r));
     }
-    return { intervals, skipped, people: intervals.length, source: 'cleaned', meta: {} };
+    return { intervals, skipped, noRows, yesRows: intervals.length, people: intervals.length, keys, source: 'cleaned', meta: {} };
   }
 
   function extractRaw(rows, secIdx) {
@@ -638,12 +650,23 @@
     const ai = findCol(headers, 'Attended'), ji = findCol(headers, 'Join Time'), li = findCol(headers, 'Leave Time');
     const ei = findCol(headers, 'Email'), pi = findCol(headers, 'Phone'), ni = findCol(headers, 'User Name (Original Name)', 'User Name');
     if (ji === -1 || li === -1) throw new Error('Could not find Join Time / Leave Time in the Attendee Details section.');
-    const byPerson = new Map();
-    let skipped = 0;
+    // only the Attendee Details rows, and only those marked Attended = Yes.
+    // Hosts, panelists, "Other Attended" presenters and No-show registrants are never counted.
+    const SECTION = new Set(['otherattended', 'hostdetails', 'panelistdetails', 'attendeedetails']);
+    const section = [];
     for (let r = secIdx + 2; r < rows.length; r++) {
       const row = rows[r];
+      if (SECTION.has(norm(row[0]))) break;
       if (row.filter(c => c.trim() !== '').length <= 1 && row.length < headers.length - 2) break;
-      if (ai !== -1 && cell(row, ai).toLowerCase() !== 'yes') continue;
+      section.push(row);
+    }
+    detectDateOrder(section.map(r => r[ji]));
+    const byPerson = new Map();
+    let skipped = 0, noRows = 0, yesRows = 0;
+    for (let r = 0; r < section.length; r++) {
+      const row = section[r];
+      if (ai === -1 || cell(row, ai).toLowerCase() !== 'yes') { noRows++; continue; }
+      yesRows++;
       const a = parseStamp(row[ji]), b = parseStamp(row[li]);
       if (!a || !b || b < a) { skipped++; continue; }
       const email = cell(row, ei).toLowerCase();
@@ -662,7 +685,7 @@
       }
       intervals.push(cur);
     }
-    return { intervals, skipped, people: byPerson.size, source: 'raw', meta };
+    return { intervals, skipped, noRows, yesRows, people: byPerson.size, keys: new Set(byPerson.keys()), source: 'raw', meta };
   }
 
   function sweep(intervals) {
@@ -692,7 +715,7 @@
     for (const [a] of ex.intervals) { const d = new Date(a); const key = d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); dateCounts[key] = (dateCounts[key] || 0) + 1; }
     const dateKey = Object.keys(dateCounts).sort((x, y) => dateCounts[y] - dateCounts[x])[0];
     const [dy, dm, dd] = dateKey.split('-').map(Number);
-    return Object.assign({ intervals: ex.intervals, skipped: ex.skipped, people: ex.people, source: ex.source, meta: ex.meta, date: { y: dy, m: dm, d: dd } }, sw);
+    return Object.assign({ intervals: ex.intervals, skipped: ex.skipped, noRows: ex.noRows, yesRows: ex.yesRows, people: ex.people, keys: ex.keys, source: ex.source, meta: ex.meta, date: { y: dy, m: dm, d: dd } }, sw);
   }
 
   function countAt(intervals, t) { let n = 0; for (const [a, b] of intervals) if (a <= t && t <= b) n++; return n; }
@@ -945,12 +968,22 @@
     const spec = { id: 'all', start: sw.start, end: sw.end, yMax: sw.peak, main: { curve: sw.curve, color: 'var(--gold)' }, thin: ok.map(f => ({ curve: f.parsed.curve, color: f.hue })), peak: { t: sw.peakAt, n: sw.peak } };
     const dates = new Set(ok.map(f => fmtDate(f.parsed.date)));
     const legendFiles = ok.map(f => `<span style="--c:${f.hue}"><i></i>${esc(f.parsed.meta.topic || f.name)}</span>`).join('');
+    // same people in two files = same webinar loaded twice (e.g. raw + cleaned); the sum would double-count them
+    const dupes = [];
+    for (let i = 0; i < ok.length; i++) for (let j = i + 1; j < ok.length; j++) {
+      const A = ok[i].parsed.keys, B = ok[j].parsed.keys;
+      if (!A || !B || !A.size || !B.size) continue;
+      let shared = 0; for (const k of A) if (B.has(k)) shared++;
+      if (shared / Math.min(A.size, B.size) > .5) dupes.push([ok[i], ok[j]]);
+    }
+    const dupeNote = dupes.length ? `<div class="warn">${dupes.map(([a, b]) => `<strong>${esc(a.parsed.meta.topic || a.name)}</strong> and <strong>${esc(b.parsed.meta.topic || b.name)}</strong> share most of the same attendees, so they look like one webinar loaded twice. These combined numbers double-count it; remove one of the two.`).join('<br>')}</div>` : '';
     combinedEl.hidden = false;
     combinedEl.innerHTML = `<article class="card combined paper ${first ? 'enter' : ''}">
       <div class="card-head">
         <div class="name display">All ${ok.length} reports together</div>
         <div class="meta">${[...dates].join(', ')} · ${ok.reduce((s, f) => s + f.parsed.people, 0)} attendees · ${fmtTimeShort(sw.start)} to ${fmtTimeShort(sw.end)}</div>
       </div>
+      ${dupeNote}
       <div class="figures">
         ${figureHTML({ label: 'Combined peak', value: sw.peak, when: fmtTime(sw.peakAt, true), sub: held + (sumPeaks !== sw.peak ? ' · individual peaks add up to ' + sumPeaks : ''), bigCls: 'peakbig' })}
         ${figureHTML({ label: 'Combined at price reveal', value: revValue, when: revWhen, sub: revValue === null ? 'Set a time above, or click the chart.' : revSub, cls: 'reveal-fig' })}
@@ -988,7 +1021,9 @@
       }
       const p = f.parsed, rv = effectiveReveal(f), r = revealFor(f);
       const held = p.peakUntil > p.peakAt ? `held for ${fmtDur(p.peakUntil - p.peakAt)}` : 'momentary';
-      const metaBits = [fmtDate(p.date), p.people + ' attendees', fmtTimeShort(p.start) + ' to ' + fmtTimeShort(p.end)];
+      const metaBits = [fmtDate(p.date), p.people + ' attendees (Attended = Yes)', fmtTimeShort(p.start) + ' to ' + fmtTimeShort(p.end)];
+      if (p.source === 'raw') metaBits.push(p.yesRows + ' join segments');
+      if (p.noRows) metaBits.push(p.noRows + ' no-show' + (p.noRows > 1 ? 's' : '') + ' ignored');
       if (p.meta.zoomMax) metaBits.push('Zoom max ' + p.meta.zoomMax + ' views');
       if (p.skipped) metaBits.push(p.skipped + ' row' + (p.skipped > 1 ? 's' : '') + ' skipped');
       const overrideInput = `<div class="inline-time"><input type="time" data-override="${f.id}" value="${esc(rv || '')}" aria-label="Price reveal time for this file"><span class="note">this file only</span></div>`;
